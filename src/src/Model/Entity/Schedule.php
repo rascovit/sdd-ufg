@@ -31,6 +31,21 @@ class Schedule extends Entity
 
     public function _getPeriod()
     {
-        return $this->start_time->format('H:i:s') . " ~ " . $this->end_time->format('H:i:s');
+        return $this->start_time_formated . " ~ " . $this->end_time_formated;
+    }
+
+    public function _getStartTimeFormated()
+    {
+        return $this->formatTime($this->start_time);
+    }
+
+    public function _getEndTimeFormated()
+    {
+        return $this->formatTime($this->end_time);
+    }
+
+    private function formatTime($time)
+    {
+      return $time->format('H:i');
     }
 }

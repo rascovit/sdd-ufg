@@ -102,14 +102,36 @@ class ProcessesController extends AppController
      * @return \Cake\Network\Response|null Redirects to index.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function cancel($id = null)
     {
-        $this->request->allowMethod(['post', 'delete']);
+        $this->request->allowMethod(['post', 'cancel']);
         $process = $this->Processes->get($id);
-        if ($this->Processes->delete($process)) {
-            $this->Flash->success(__('O processo foi deletado com sucesso.'));
+        $process->status = 'CANCELLED';
+        if ($this->Processes->save($process)) {
+            $this->Flash->success(__('O processo foi cancelado com sucesso.'));
         } else {
-            $this->Flash->error(__('O processo nao pode ser deletado. Por favor, tente novamente.'));
+            $this->Flash->error(__('O processo nao pode ser cancelado. Por favor, tente novamente.'));
+        }
+        return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Close method
+     *
+     * @param string|null $id Process id.
+     * @return \Cake\Network\Response|null Redirects to index.
+     * @throws \Cake\Network\Exception\NotFoundException When record not found.
+     */
+    public function close($id = null)
+    {
+        $this->request->allowMethod(['post', 'close']);
+        $process = $this->Processes->get($id);
+        $process->status = 'CLOSED';
+//        $process->dirty('processConfigurations');
+        if ($this->Processes->save($process)) {
+            $this->Flash->success(__('O processo foi fechado com sucesso.'));
+        } else {
+            $this->Flash->error(__('O processo nao pode ser fechado. Por favor, tente novamente.'));
         }
         return $this->redirect(['action' => 'index']);
     }
@@ -186,25 +208,6 @@ class ProcessesController extends AppController
 
         $this->set(compact('$process'));
         $this->set('_serialize', ['$process']);
-    }
-
-    /**
-     * Close method
-     *
-     * @param string|null $id Process id.
-     * @return \Cake\Network\Response|null Redirects to index.
-     * @throws \Cake\Network\Exception\NotFoundException When record not found.
-     */
-    public function close($id = null)
-    {
-        $this->request->allowMethod(['post', 'close']);
-        $process = $this->Processes->get($id);
-        if ($this->Processes->close($process)) {
-            $this->Flash->success(__('O processo foi fechado com sucesso.'));
-        } else {
-            $this->Flash->error(__('O processo nao pode ser fechado. Por favor, tente novamente.'));
-        }
-        return $this->redirect(['action' => 'index']);
     }
 
 }

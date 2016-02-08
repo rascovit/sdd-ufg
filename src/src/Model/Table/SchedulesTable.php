@@ -4,6 +4,7 @@ namespace App\Model\Table;
 use App\Model\Entity\Schedule;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
+use Cake\ORM\Rule\IsUnique;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -58,5 +59,33 @@ class SchedulesTable extends Table
             ->notEmpty('end_time');
 
         return $validator;
+    }
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
+    public function buildRules(RulesChecker $rules)
+    {
+        $rules->add(
+            new IsUnique(['start_time', 'end_time']),
+            [
+                'errorField' => 'start_time',
+                'message' => __(' ')
+            ]
+        );
+
+        $rules->add(
+            new IsUnique(['start_time', 'end_time']),
+            [
+                'errorField' => 'end_time',
+                'message' => __('Esse horário já está cadastrado')
+            ]
+        );
+
+        return $rules;
     }
 }

@@ -28,23 +28,23 @@
                   <thead>
                   <tr>
                       <th><?= $this->Paginator->sort('id', __('#ID')) ?></th>
-                      <th><?= $this->Paginator->sort('code', __('Código')) ?></th>
-                      <th><?= $this->Paginator->sort('initial_time', __('Horário de inicio')) ?></th>
-                      <th><?= $this->Paginator->sort('final_time', __('Horário de término')) ?></th>
+                      <th><?= $this->Paginator->sort('start_time', __('Horário de inicio')) ?></th>
+                      <th><?= $this->Paginator->sort('end_time', __('Horário de término')) ?></th>
                       <th width="200px"><?= __('Ações') ?></th>
                   </tr>
                   </thead>
                   <tbody>
                   <?php if($schedules->isEmpty()): ?>
                       <tr>
-                          <td colspan="3" class="text-center">Não existe nenhum horário de aula cadastrado</td>
+                          <td colspan="4" class="text-center">Não existe nenhum horário de aula cadastrado</td>
                       </tr>
                   <?php endif; ?>
 
                   <?php foreach ($schedules as $schedule): ?>
                       <tr>
                           <td><?= $this->Number->format($schedule->id) ?></td>
-                          <td><?= h($schedule->name) ?></td>
+                          <td><?= $schedule->start_time_formated ?></td>
+                          <td><?= $schedule->end_time_formated ?></td>
                           <td>
                               <?= $this->Html->link(
                                   '',
@@ -70,7 +70,7 @@
                                   '',
                                   ['action' => 'delete', $schedule->id],
                                   [
-                                      'confirm' => __('Você tem certeza de que deseja remover o horário de aula "{0}"?', $schedule->name),
+                                      'confirm' => __('Você tem certeza de que deseja remover o horário de aula "{0}"?', $schedule->id),
                                       'title' => __('Remover'),
                                       'class' => 'btn btn-sm btn-danger glyphicon glyphicon-trash',
                                       'data-toggle' => 'tooltip',

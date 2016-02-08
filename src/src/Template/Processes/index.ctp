@@ -60,7 +60,7 @@
                                             'data-original-title' => __('Visualizar'),
                                         ]
                                     ) ?>
-                                    <?php if($process->status != 'delete'): ?>
+                                    <?php if($process->status == 'OPEN' ): ?>
                                         <?= $this->Html->link(
                                             '',
                                             ['action' => 'edit', $process->id],
@@ -73,7 +73,7 @@
                                         ) ?>
                                         <?= $this->Form->postLink(
                                             '',
-                                            ['action' => 'delete', $process->id],
+                                            ['action' => 'cancel', $process->id],
                                             [
                                                 'confirm' => __('Você tem certeza de que deseja cancelar o processo "{0}"?', $process->name),
                                                 'title' => __('Cancelar'),
@@ -86,6 +86,8 @@
                                             __('Fechar'),
                                             ['action' => 'close', $process->id],
                                             [
+                                                'confirm' => __('Você tem certeza de que deseja fechar o processo "{0}"?', $process->name),
+                                                'title' => __('Fechar Processo'),
                                                 'data-toggle' => 'tooltip',
                                                 'data-original-title' => __('Fechar'),
                                                 'class' => 'btn btn-sm btn-primary'

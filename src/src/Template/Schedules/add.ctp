@@ -14,9 +14,8 @@
             </div>
             <div class="box-body">
                 <?php
-                    echo $this->Form->input('code', ['label' => 'Código do horário de aula', 'placeholder' => 'Código']);
-                    echo $this->Form->input('initial_time', ['label' => 'Horário de início', 'placeholder' => 'Horário']);
-                    echo $this->Form->input('final_time', ['label' => 'Horário de término', 'placeholder' => 'Horário']);
+                    echo $this->Form->input('start_time', ['label' => 'Horário de início', 'placeholder' => 'Horário']);
+                    echo $this->Form->input('end_time', ['label' => 'Horário de término', 'placeholder' => 'Horário']);
                 ?>
             </div>
             <div class="box-footer clearfix">
