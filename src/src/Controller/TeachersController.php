@@ -16,13 +16,8 @@ class TeachersController extends AppController
 {
 	public function isAuthorized($user)
 	{
-		//Only admin or teacher itself can edit the teacher
-		if (in_array($this->request->action, ['view', 'allocateClazzes'])) {
-		    $teacherId = (int)$this->request->params['pass'][0];
-
-		    if ($this->loggedUser->teacher->id == $teacherId) {
-                return true;
-            }
+		if($this->request->action == 'view') {
+			return true;
 		}
 
 		if (in_array($this->request->action, ['edit', 'allocateClazzes'])) {
