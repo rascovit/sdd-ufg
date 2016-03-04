@@ -91,14 +91,14 @@ class UsersTable extends Table
     }
 
     /**
-     * Finds subjects by filters
+     * Finds users by filters
      *
      * @param $filters
      * @return Query
      */
     public function findByFilters($filters)
     {
-        /** @var Query $subjects */
+        /** @var Query $users */
         $users = $this->find('all');
 
         $conditions = [];
