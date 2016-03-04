@@ -67,6 +67,12 @@ class ClazzesTable extends Table
             'targetForeignKey' => 'schedule_id',
             'joinTable' => 'clazzes_schedules_locals'
         ]);
+
+		$this->belongsToMany('Teachers', [
+            'foreignKey' => 'clazz_id',
+            'targetForeignKey' => 'teacher_id',
+            'joinTable' => 'clazzes_teachers'
+        ]);
     }
 
     /**
@@ -293,7 +299,7 @@ class ClazzesTable extends Table
 			->find('all')
 			->contain([
 				'Subjects' => function($q) {
-					return $q->select(['id', 'knowledge_id']);
+					return $q->select(['id', 'knowledge_id', 'theoretical_workload', 'practical_workload']);
 				}
 			])
 			->contain([
@@ -301,7 +307,15 @@ class ClazzesTable extends Table
 					return $q->select(['id']);
 				}
 			])
-			->hydrate(false)->toArray();
+            ->hydrate(false)->toArray();
+	}
+
+	public function setTeachersAllClazzes($clazzes){
+		foreach($clazzes as $clazz){
+			$this->save($clazz);
+			//$result = $clazz->dirty('teachers', true);
+			//echo $result . '<br>';
+		}
 	}
 	
 	/**

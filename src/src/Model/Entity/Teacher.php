@@ -2,6 +2,7 @@
 namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
 
 /**
  * Teacher Entity.
@@ -43,4 +44,15 @@ class Teacher extends Entity
     public function _getDisplayField() {
         return $this->user->name;
     }
+	
+	public function _getCurrentWorkload(){
+		$currentWorkload = 0;
+		$clazzes = TableRegistry::get('Clazzes')->getAllClazzesWithSubjctsTeachers();
+		foreach($clazzes as $clazz){
+			if(@$clazz->teachers[0]->id === $this->id){
+				$currentWorkload += ($clazz->subject->theoretical_workload + $clazz->subject->practical_workload) / 16;
+			}
+		}
+		return $currentWorkload;
+	}
 }

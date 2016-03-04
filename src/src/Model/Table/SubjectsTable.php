@@ -130,4 +130,38 @@ class SubjectsTable extends Table
 
         return $rules;
     }
+
+    /**
+     * Finds subjects by filters
+     *
+     * @param $filters
+     * @return Query
+     */
+    public function findByFilters($filters)
+    {
+        /** @var Query $subjects */
+        $subjects = $this->find('all')->contain(['Knowledges', 'Courses']);
+
+        $conditions = [];
+        if(isset($filters) && is_array($filters)) {
+            if(isset($filters['name']) && !empty(trim($filters['name']))) {
+                $conditions['Subjects.name LIKE'] = "%" . $filters['name'] . "%";
+            }
+
+            if(isset($filters['course']) && $filters['course'] != 0) {
+                $conditions['Subjects.course_id'] = $filters['course'];
+            }
+
+            if(isset($filters['knowledge']) && $filters['knowledge'] != 0) {
+                $conditions['Subjects.knowledge_id'] = $filters['knowledge'];
+            }
+        }
+
+        $subjects->where($conditions);
+
+        return [
+            'data' => $subjects,
+            'isFiltered' => !empty($conditions)
+        ];
+    }
 }

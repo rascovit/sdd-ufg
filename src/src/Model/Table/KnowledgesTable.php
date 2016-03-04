@@ -83,4 +83,27 @@ class KnowledgesTable extends Table
 
         return $rules;
     }
+
+    /**
+     * Finds knowledges by filters
+     *
+     * @param $filters
+     * @return Query
+     */
+    public function findByFilters($filters)
+    {
+        /** @var Query $knowledges */
+        $knowledges = $this->find('all');
+
+        $conditions = [];
+        if(isset($filters) && is_array($filters)) {
+            if(isset($filters['name']) && !empty(trim($filters['name']))) {
+                $conditions['Knowledges.name LIKE'] = "%" . $filters['name'] . "%";
+            }
+        }
+
+        $knowledges->where($conditions);
+
+        return $knowledges;
+    }
 }

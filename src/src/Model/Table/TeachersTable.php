@@ -190,8 +190,7 @@ class TeachersTable extends Table
 				'KnowledgesTeachers' => function($q) {
 					return $q->select(['id']);
 				}
-			])
-			->hydrate(false)->toArray();
+			]);
 	}
 
     public function getSubAllocated(Process $process) {

@@ -306,3 +306,18 @@ tr[data-clazz-schedule] {
 .table-notification tbody tr:hover {
     background-color: #fef8c5 !important;
 }
+
+.required > label {
+    font-weight: bold;
+}
+.required > label:after {
+    content: ' *';
+    color: #C3232D;
+}
+
+.asc:after {
+    content: " \2193";
+}
+.desc:after {
+    content: " \2191";
+}

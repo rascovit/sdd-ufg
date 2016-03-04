@@ -6,6 +6,44 @@
 
 <div class="row">
     <div class="col-xs-12">
+        <div class="box box-primary <?= !$isFiltered ? 'collapsed-box' : '' ?>">
+            <div class="box-header with-border">
+                <button class="btn btn-primary btn-xs pull-left" style="margin-right: 5px" data-widget="collapse" data-original-title="Collapse">
+                    <i class="fa <?= !$isFiltered ? 'fa-plus' : 'fa-minus' ?>"></i>
+                </button>
+
+                <h3 class="box-title" style="vertical-align: middle"> <?= __('Filtros') ?></h3>
+            </div>
+
+            <?= $this->Form->create(null, ['type' => 'get']) ?>
+            <div class="box-body" <?= !$isFiltered ? 'style="display: none;"' : '' ?>>
+                <div class="row">
+                    <div class="col-lg-12 col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <?= $this->Form->input('name', ['label' => __('Nome da disciplina')]) ?>
+                            </div>
+                            <div class="col-sm-4">
+                                <?=	$this->Form->input('course', ['label' => __('Curso'), 'options' => $courses]) ?>
+                            </div>
+                            <div class="col-sm-4">
+                                <?= $this->Form->input('knowledge', ['label' => __('Núcleo de conhecimento'), 'options' => $knowledges]) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-footer" <?= !$isFiltered ? 'style="display: none;"' : '' ?>>
+                <?= $this->Form->button(__('Filtrar'), ['class' => 'btn btn-success']) ?>
+                <a id="empty" class="btn btn-default"><?= __('Limpar') ?></a>
+            </div>
+            <?= $this->Form->end() ?>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
         <div class="box box-primary">
             <div class="box-header">
                 <h3 class="box-title">Lista de disciplinas</h3>
@@ -95,3 +133,23 @@
         </div>
     </div>
 </div>
+
+<script>
+    <?php $this->Html->scriptStart(['block' => true]); ?>
+    $(document).ready(function() {
+        $("#empty").click(function() {
+            var form = $(this).closest('form');
+            form.find("input[type=text], textarea").val("");
+
+            form.find("select").each(function(elem) {
+                if($(this).prop('multiple') == true) {
+                    $(this).find("option:selected").prop("selected", false);
+                    $(this).select2('val', '');
+                } else {
+                    $(this).find('option').first().prop('selected', true);
+                }
+            });
+        });
+    });
+    <?php $this->Html->scriptEnd(); ?>
+</script>
