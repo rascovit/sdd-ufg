@@ -45,7 +45,20 @@ class UsersController extends AppController
      */
     public function index()
     {
-        $this->set('users', $this->paginate($this->Users));
+		$this->paginate = [
+            'limit' => 25,
+            'order' => [
+                'Users.id' => 'ASC'
+            ]
+        ];
+
+        $this->request->data = $this->request->query;
+        $findByFilters = $this->Users->findByFilters($this->request->query);
+        $users = $findByFilters['data'];
+
+        $this->set('isFiltered', $findByFilters['isFiltered']);
+
+        $this->set('users', $this->paginate($users));
         $this->set('_serialize', ['users']);
     }
 
