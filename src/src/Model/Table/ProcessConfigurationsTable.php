@@ -65,6 +65,7 @@ class ProcessConfigurationsTable extends Table
             ->notEmpty('data_type');
 
         $validator
+            ->add('type', 'enum', ['rule' => ['inList', ['CRITERIA', 'RESTRICTION'], true]])
             ->requirePresence('type', 'create')
             ->notEmpty('type');
 

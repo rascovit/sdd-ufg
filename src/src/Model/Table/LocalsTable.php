@@ -57,6 +57,7 @@ class LocalsTable extends Table
 
         $validator
             ->add('capacity', 'valid', ['rule' => 'numeric'])
+            ->add('capacity', 'valid', ['rule' => ['range', 1, 512], 'message' => 'Capacidade deve ser maior que zero!'])
             ->requirePresence('capacity', 'create')
             ->notEmpty('capacity');
 

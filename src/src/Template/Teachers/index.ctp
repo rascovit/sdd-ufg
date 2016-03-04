@@ -40,7 +40,7 @@
                     <tbody>
                         <?php if($teachers->isEmpty()): ?>
                             <tr>
-                                <td colspan="5" class="text-center">Não existe nenhuma docente cadastrada</td>
+                                <td colspan="8" class="text-center">Não existe nenhum docente cadastrado</td>
                             </tr>
                         <?php endif; ?>
 

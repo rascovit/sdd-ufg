@@ -58,18 +58,20 @@
 						<td><?= $this->Number->format($teacher->workload) ?></td>
 					</tr>
 					<tr>
-						<th><?= __('Data de Cadastro') ?></th>
-						<td><?= h($teacher->entry_date) ?></td>
+						<th><?= __('Data de Ingresso') ?></th>
+						<td><?= h($teacher->entry_date ?
+                            $teacher->entry_date->i18nFormat('dd/MM/yyyy') : '') ?></td>
 					</tr>
 					<tr>
 						<th><?= __('Data de Nascimento') ?></th>
-						<td><?= h($teacher->birth_date) ?></td>
+						<td><?= h($teacher->birth_date ?
+						    $teacher->birth_date->i18nFormat('dd/MM/yyyy') : '') ?></td>
 					</tr>
 				</table>
 			</div>
 		</div>
     </div>
-	
+
 	<div class="col-xs-12"> <!-- Tabela de usuário do docente -->
         <div class="box box-primary">
             <div class="box-header">
@@ -87,14 +89,14 @@
                             <th width="200px"><?= __('Ações') ?></th>
                         </tr>
                     </thead>
-                    <tbody>				
+                    <tbody>
 
 						<?php if(count($teacher->user) < 1): ?>
 							<tr>
 								<td colspan="7" class="text-center">Esse docente não possui nenhum usuário associado</td>
 							</tr>
 						<?php endif; ?>
-						
+
 						<tr>
 							<td><?= $this->Number->format($teacher->user->id) ?></td>
 							<td><?= h($teacher->user->name) ?></td>
@@ -123,13 +125,13 @@
 									]
 								) ?>
 							</td>
-						</tr>						
+						</tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-	
+
 	<div class="col-xs-12"> <!-- Tabela de papéis do docente -->
         <div class="box box-primary">
             <div class="box-header">
@@ -152,13 +154,14 @@
 							<td colspan="3" class="text-center">Esse docente não possui nenhum papel associado</td>
 						</tr>
 					<?php endif; ?>
-					
+
 					<?php foreach ($teacher->roles as $role): ?>
 						<tr>
 							<td><?= $this->Number->format($role->id) ?></td>
-							<td><?= h($role->type) ?></td>
-							<td><?= h($role->type == 'COORDINATOR' || $role->type == 'FACILITATOR' 
-								? $role->knowledge->name : 'Não é coordenador e nem facilitador') ?></td>
+							<td><?= h($role->type == 'COORDINATOR'
+                                ? 'Coordenador' : 'Facilitador') ?></td>
+							<td><?= h($role->type == 'FACILITATOR'
+								? $role->knowledge->name : '') ?></td>
 							<td>
 								<?= $this->Html->link(
 									'',
@@ -188,7 +191,7 @@
             </div>
         </div>
     </div>
-	
+
 	<div class="col-xs-12"> <!-- Tabela de núcleos de conhecimento do docente -->
         <div class="box box-primary">
             <div class="box-header">
@@ -210,7 +213,7 @@
 							<td colspan="3" class="text-center">Esse docente não possui nenhum núcleo de conhecimento associado</td>
 						</tr>
 					<?php endif; ?>
-					
+
 					<?php foreach ($teacher->knowledges as $knowledge): ?>
 						<tr>
 							<td><?= $this->Number->format($knowledge->id) ?></td>
@@ -244,7 +247,7 @@
             </div>
         </div>
     </div>
-	
+
 	<div class="col-xs-12"> <!-- Tabela de turmas do docente -->
         <div class="box box-primary">
             <div class="box-header">
@@ -269,7 +272,7 @@
 							<td colspan="6" class="text-center">Esse docente não possui nenhuma turma associada</td>
 						</tr>
 					<?php endif; ?>
-					
+
 					<?php foreach ($teacher->clazzes as $clazze): ?>
 						<tr>
 							<td><?= $this->Number->format($clazze->id) ?></td>

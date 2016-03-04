@@ -1,7 +1,7 @@
-<?php $this->assign('title', 'Disciplinas'); ?>
+<?php $this->assign('title', 'Papéis'); ?>
 <?php $this->start('breadcrumb'); ?>
     <li><?= $this->Html->link('<i class="fa fa-dashboard"></i>' . __('Dashboard'), '/', ['escape' => false]) ?></li>
-    <li><?= $this->Html->link(__('Disciplinas'), ['action' => 'index']) ?></li>
+    <li><?= $this->Html->link(__('Lista de Papéis'), ['action' => 'index']) ?></li>
     <li class="active">Adicionar</li>
 <?php $this->end(); ?>
 
@@ -34,9 +34,8 @@
                     $("#knowledge").parent().show();
                 } else {
                     $("#knowledge").parent().hide();
-                    $("#knowledge").val(0);
                 }
-            });
+            }).trigger("change");
 
         });
     <?php $this->Html->scriptEnd(); ?>

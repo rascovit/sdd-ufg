@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Controller\AppController;
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\TableRegistry;
+use Cake\View\Helper\SessionHelper;
 
 /**
  * Teachers Controller
@@ -12,12 +13,21 @@ use Cake\ORM\TableRegistry;
  */
 class TeachersController extends AppController
 {
+	public function isAuthorized($user)
+	{
+		//Only admin or teacher itself can edit the teacher
+		if (in_array($this->request->action, ['edit', 'allocateClazzes'])) {
+			$teacherId = (int)$this->request->params['pass'][0];
 
-	public function initialize()
-    {
-        parent::initialize();
-        $this->loadComponent('RequestHandler');
-    }
+			if ($this->loggedUser->teacher->id === $teacherId || $this->loggedUser->canAdmin()) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return parent::isAuthorized($user);
+	}
 
     /**
      * Index method
@@ -26,8 +36,20 @@ class TeachersController extends AppController
      */
     public function index()
     {
-        $this->set('teachers', $this->paginate($this->Teachers->find('all')->contain(['Users'])));
-        $this->set('_serialize', ['teachers']);
+
+		$this->set('teachers', $this->paginate($this->Teachers->find('all')->contain(['Users'])));
+
+		if (!$this->loggedUser->isCoordinator()) {
+
+			$this->set('teachers', $this->paginate($this->Teachers->find('all')
+				->contain(['Users' ])
+				->innerJoinWith('Users', function($q) {
+					return $q->where(['Users.id' => $this->loggedUser->teacher->id]);
+				})
+			));
+		}
+
+		$this->set('_serialize', ['teachers']);
     }
 
     /**
@@ -54,30 +76,29 @@ class TeachersController extends AppController
      */
     public function add()
     {
-    		$teacher = $this->Teachers->newEntity();
+    	$teacher = $this->Teachers->newEntity();
+		$this->loadModel('Knowledges');
+        $knowledges = $this->Knowledges->find('list',array('fields'=>array('id','name')));
 
-    		if ($this->request->is('post')) {
+		if ($this->request->is('post')) {
+			$data = $this->request->data;
+			$data['user']['is_admin'] = isset($this->request->data['user']['is_admin']) ? 1 : 0;
 
-    			$data = $this->request->data;
-    			$data['user']['is_admin'] = isset($this->request->data['user']['is_admin']) ? 1 : 0;
-
-    			$teacher = $this->Teachers->newEntity($data, [
-    				'associated' => ['Users' => ['validate' => 'default']]
-    			]);
+			$teacher = $this->Teachers->patchEntity($teacher, $data, [
+				'associated' => ['Users' => ['validate' => 'default'], 'Knowledges']
+			]);
 
             if ($this->Teachers->save($teacher)) {
                 $this->Flash->success(__('The teacher has been saved.'));
-                return $this->redirect(['action' => 'edit', $teacher->id]);
+                return $this->redirect(['action' => 'index']);
             } else {
                 $this->Flash->error(__('The teacher could not be saved. Please, try again.'));
             }
         }
         $this->set(compact('teacher'));
 
-        $this->loadModel('Knowledges');
-        $knowledges = $this->Knowledges->find('list',array('fields'=>array('id','name')));
-        $this->set(compact('knowledges'));
 
+        $this->set(compact('knowledges'));
         $this->set('_serialize', ['teacher']);
     }
 
@@ -91,13 +112,16 @@ class TeachersController extends AppController
     public function edit($id = null)
     {
         $teacher = $this->Teachers->get($id, [
-            'contain' => ['Users'
+            'contain' => ['Users', 'Knowledges'
 				, 'Clazzes'
 				, 'Clazzes.Subjects'
 				, 'Clazzes.Subjects.Knowledges'
 				, 'Clazzes.Subjects.Courses'
 			]
         ]);
+
+        $teacher->entry_date = $teacher->entry_date->i18nFormat('dd/MM/yyyy');
+        $teacher->birth_date = $teacher->birth_date->i18nFormat('dd/MM/yyyy');
 
         if ($this->request->is(['patch', 'post', 'put'])) {
 
@@ -110,7 +134,7 @@ class TeachersController extends AppController
 			}
 
 			$teacher = $this->Teachers->patchEntity($teacher, $data, [
-				'associated' => ['Users' => ['validate' => 'default']]
+				'associated' => ['Users' => ['validate' => 'default'], 'Knowledges']
 			]);
 
             if ($this->Teachers->save($teacher)) {
@@ -122,9 +146,9 @@ class TeachersController extends AppController
         }
 
         $this->loadModel('Knowledges');
-        $knowledges = $this->Knowledges->find('list',array('fields'=>array('id','name')));
-        $this->set(compact('knowledges'));
+        $knowledges = $this->Knowledges->find('list', array('fields' => array('id', 'name')));
 
+		$this->set(compact('knowledges'));
         $this->set(compact('teacher'));
         $this->set('_serialize', ['teacher']);
     }
@@ -170,11 +194,13 @@ class TeachersController extends AppController
 			]
         ]);
 
-		$processes = $table_processes->find('all')->where(['initial_date <= ' => 'CURDATE()', 'final_date >= ' => 'CURDATE()'])->orWhere(['status' => 'OPENED']);
+		$processes = $table_processes->find('list')
+            ->where(['status' => 'OPENED'])
+            ->toArray();
 
-		$count = $processes->count();
+        $processes = array_replace(['' => __('[Selecione]')], $processes);
 
-		if ($count < 1) {
+		if (count($processes) < 2) {
 
 			$this->Flash->info(__('Não existe nenhum Processo de Distribuição de Disciplinas aberto.'));
 			$this->set('process_exists', false);
@@ -186,19 +212,10 @@ class TeachersController extends AppController
 			$this->set('_serialize', ['clazzes']);
 			$this->set('processes', array());
 			$this->set('_serialize', ['processes']);
-			$this->set('process_options', array());
-			$this->set('_serialize', ['process_options']);
-
 
 		} else {
 
-			$process_options = array();
-
-			foreach($processes as $p) {
-				$process_options[$p->id] = $p->name;
-			}
-
-			$clazzes = $this->getClazzes(current(array_keys($process_options)));
+			$clazzes = $this->getClazzes();
 
 			if ($this->RequestHandler->accepts('ajax')) {
 
@@ -246,7 +263,7 @@ class TeachersController extends AppController
 			/* Filters */
 			if ($this->request->is('post')) {
 				$data = $this->request->data;
-				$clazzes = $this->getClazzes($data['process'], $data);
+				$clazzes = $this->getClazzes($data);
 				echo json_encode($clazzes);
 				die();
 			}
@@ -255,7 +272,7 @@ class TeachersController extends AppController
 			$this->set('_serialize', ['teacher']);
 			$this->set('clazzes', $clazzes);
 			$this->set('_serialize', ['clazzes']);
-			$this->set('processes', $process_options);
+			$this->set('processes', $processes);
 			$this->set('_serialize', ['processes']);
 			$this->set('process_exists', true);
 			$this->set('_serialize', ['process_exists']);
@@ -272,171 +289,61 @@ class TeachersController extends AppController
      * @return paginated data.
      */
 
-    private function getClazzes($process_id, $params = null) 
-    {	
-		$connection = ConnectionManager::get('default');
-		
-		if ($params === null) {
+    private function getClazzes($params = null)
+    {
 
-			$sql = 'SELECT 
-				Clazzes.id AS `Clazzes__id`,
-				Clazzes.name AS `Clazzes__name`,
-				Clazzes.vacancies AS `Clazzes__vacancies`,
-				Clazzes.subject_id AS `Clazzes__subject_id`,
-				Clazzes.process_id AS `Clazzes__process_id`,
-				Subjects.id AS `Subjects__id`,
-				Subjects.name AS `Subjects__name`,
-				Subjects.theoretical_workload AS `Subjects__theoretical_workload`,
-				Subjects.practical_workload AS `Subjects__practical_workload`,
-				Subjects.knowledge_id AS `Subjects__knowledge_id`,
-				Subjects.course_id AS `Subjects__course_id`,
-				Knowledges.id AS `Knowledges__id`,
-				Knowledges.name AS `Knowledges__name`,
-				Courses.id AS `Courses__id`,
-				Courses.name AS `Courses__name`,
-				Locals.id AS `Locals__id`,
-				Locals.name AS `Locals__name`,
-				Locals.address AS `Locals__address`,
-				Locals.capacity AS `Locals__capacity`,
-				ClazzesSchedulesLocals.clazz_id AS `ClazzesSchedulesLocals__clazz_id`,
-				ClazzesSchedulesLocals.schedule_id AS `ClazzesSchedulesLocals__schedule_id`,
-				ClazzesSchedulesLocals.local_id AS `ClazzesSchedulesLocals__local_id`,
-				ClazzesSchedulesLocals.week_day AS `ClazzesSchedulesLocals__week_day`,
-				Schedules.id AS `Schedules__id`,
-				Schedules.start_time AS `Schedules__start_time`,
-				Schedules.end_time AS `Schedules__end_time`
-			FROM
-				clazzes Clazzes
-					INNER JOIN
-				subjects Subjects ON (Subjects.id = (Clazzes.subject_id))
-					INNER JOIN
-				knowledges Knowledges ON (Knowledges.id = (Subjects.knowledge_id))
-					INNER JOIN
-				courses Courses ON (Courses.id = (Subjects.course_id))
-					INNER JOIN
-				clazzes_schedules_locals ClazzesSchedulesLocals ON (Clazzes.id = (ClazzesSchedulesLocals.clazz_id))
-					INNER JOIN
-				locals Locals ON (Locals.id = ClazzesSchedulesLocals.local_id)
-					INNER JOIN
-				schedules Schedules ON (Schedules.id = ClazzesSchedulesLocals.schedule_id)
-			WHERE
-				process_id = ?';
-					
-					
-			$results = $connection->execute($sql, [
-					$process_id]
-				, ['integer'])->fetchAll('assoc');
-		
-		} else {
-					
-			$sql = 'SELECT 
-				Clazzes.id AS `Clazzes__id`,
-				Clazzes.name AS `Clazzes__name`,
-				Clazzes.vacancies AS `Clazzes__vacancies`,
-				Clazzes.subject_id AS `Clazzes__subject_id`,
-				Clazzes.process_id AS `Clazzes__process_id`,
-				Subjects.id AS `Subjects__id`,
-				Subjects.name AS `Subjects__name`,
-				Subjects.theoretical_workload AS `Subjects__theoretical_workload`,
-				Subjects.practical_workload AS `Subjects__practical_workload`,
-				Subjects.knowledge_id AS `Subjects__knowledge_id`,
-				Subjects.course_id AS `Subjects__course_id`,
-				Knowledges.id AS `Knowledges__id`,
-				Knowledges.name AS `Knowledges__name`,
-				Courses.id AS `Courses__id`,
-				Courses.name AS `Courses__name`,
-				Locals.id AS `Locals__id`,
-				Locals.name AS `Locals__name`,
-				Locals.address AS `Locals__address`,
-				Locals.capacity AS `Locals__capacity`,
-				ClazzesSchedulesLocals.clazz_id AS `ClazzesSchedulesLocals__clazz_id`,
-				ClazzesSchedulesLocals.schedule_id AS `ClazzesSchedulesLocals__schedule_id`,
-				ClazzesSchedulesLocals.local_id AS `ClazzesSchedulesLocals__local_id`,
-				ClazzesSchedulesLocals.week_day AS `ClazzesSchedulesLocals__week_day`,
-				Schedules.id AS `Schedules__id`,
-				Schedules.start_time AS `Schedules__start_time`,
-				Schedules.end_time AS `Schedules__end_time`
-			FROM
-				clazzes Clazzes
-					INNER JOIN
-				subjects Subjects ON (Subjects.name LIKE ?
-					AND Subjects.id = (Clazzes.subject_id))
-					INNER JOIN
-				knowledges Knowledges ON (Knowledges.name LIKE ?
-					AND Knowledges.id = (Subjects.knowledge_id))
-					INNER JOIN
-				courses Courses ON (Courses.name LIKE ?
-					AND Courses.id = (Subjects.course_id))
-					INNER JOIN
-				clazzes_schedules_locals ClazzesSchedulesLocals ON (Clazzes.id = (ClazzesSchedulesLocals.clazz_id))
-					INNER JOIN
-				locals Locals ON (Locals.id = ClazzesSchedulesLocals.local_id)
-					INNER JOIN
-				schedules Schedules ON (Schedules.id = ClazzesSchedulesLocals.schedule_id)
-			WHERE
-				process_id = ?
-				AND Clazzes.id in (
-					SELECT ClazzesSchedulesLocals.clazz_id
-					FROM clazzes_schedules_locals ClazzesSchedulesLocals
-					INNER JOIN
-				locals Locals ON (Locals.id = ClazzesSchedulesLocals.local_id
-					and (Locals.address LIKE ?
-						OR Locals.name LIKE ?))
-					INNER JOIN
-				schedules Schedules ON (Schedules.id = ClazzesSchedulesLocals.schedule_id
-						AND Schedules.start_time >= CAST(? as TIME)
-						AND Schedules.end_time <= CAST(? as TIME))
-					WHERE ClazzesSchedulesLocals.week_day LIKE ?
-				)';
+		$this->loadModel('Clazzes');
 
-			$results = $connection->execute($sql, [
-					'%' . $params['subject_name'] . '%',
-					'%' . $params['knowledge_name'] . '%',
-					'%' . $params['course_name'] . '%',
-					$params['process'],
-					'%' . $params['local'] . '%',
-					'%' . $params['local'] . '%',
-					(int)$params['start_time']['hour'] . ':' . (int)$params['start_time']['minute'],
-					(int)$params['end_time']['hour'] . ':' . (int)$params['end_time']['minute'],
-					'%' . $params['week_day'] . '%']
-				, ['string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'integer'])->fetchAll('assoc');
+		$data = $this->Clazzes->find('all')
+            ->contain([
+                'Subjects.Courses', 'Subjects.Knowledges',
+                'ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules',
+                'Processes'
+			])
+			->innerJoinWith('Processes', function ($q) use ($params) {
+				return $q->where(['Processes.status' => 'OPENED']);
+			});
 
-		}
-		
-		$formatted_results = array();
-			
-		$joins = array('locals' => array('Locals__id' => 'id', 'Locals__name' => 'name', 'Locals__address' => 'address'), 
-						'schedules' => array('Schedules__id' => 'id', 'Schedules__start_time' => 'start_time', 'Schedules__end_time' => 'end_time'),
-						'SchedulesLocals' => array('ClazzesSchedulesLocals__week_day' => 'week_day'));
-		
-		$formatted_results = $this->create_join_array($results, $joins);
-		
-		return $formatted_results;
-	}
+        if($params !== null) {
 
-	function create_join_array($rows, $joins){
+			$data = $this->Clazzes->find('all')
+				->contain([
+					'Subjects' => function ($q) use ($params) {
+						return $q->where(['Subjects.name LIKE ' => '%' . $params['subject_name'] . '%']);
+					},
+					'Subjects.Courses' => function ($q) use ($params) {
+						return $q->where(['Courses.name LIKE ' => '%' . $params['course_name'] . '%']);
+					},
+					'Subjects.Knowledges' => function ($q) use ($params) {
+						return $q->where(['Knowledges.name LIKE ' => '%' . $params['knowledge_name'] . '%']);
+					},
+					'Processes' => function ($q) use ($params) {
+						return $q->where(['Processes.id LIKE ' => '%' . $params['process'] . '%']);
+					},
+					'ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules'
+				])
+				->innerJoinWith('ClazzesSchedulesLocals.Locals', function ($q) use ($params) {
+						return $q->where(['Locals.name LIKE ' => '%' . $params['local'] . '%'])
+								->orWhere(['Locals.address LIKE ' => '%' . $params['local'] . '%']);
+					})
+				->innerJoinWith('ClazzesSchedulesLocals.Schedules', function ($q) use ($params) {
+						return $q->where(['Schedules.start_time >= ' => $params['start_time']['hour'] . ':' . $params['start_time']['minute'],
+								'Schedules.end_time <= ' => $params['end_time']['hour'] . ':' . $params['end_time']['minute']]);
+					})
+				->innerJoinWith('Processes', function ($q) use ($params) {
+					return $q->where(['Processes.status' => 'OPENED']);
+				});
 
-		$out = array();
-
-		foreach((array)$rows as $row){
-			if (!isset($out[$row['Clazzes__id']])) {
-				$out[$row['Clazzes__id']] = $row;
+			if (!empty($params['week_day'])) {
+				$data->where(['week_day' => $params['week_day']]);
 			}
 
-			foreach($joins as $name => $item){
-				unset($newitem);
-				foreach($item as $field => $newfield){
-					unset($out[$row['Clazzes__id']][$field]);
-					if (!empty($row[$field]))
-						$newitem[$newfield] = $row[$field];
-				}
-				if (!empty($newitem))
-					$out[$row['Clazzes__id']][$name][$newitem[key($newitem)]] = $newitem;
-			}
-		}
 
-		return $out;
+			$data->group(['Clazzes.id']);
 
+        }
+
+		return $data->all();
 	}
 }
 

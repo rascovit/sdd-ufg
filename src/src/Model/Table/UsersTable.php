@@ -33,6 +33,12 @@ class UsersTable extends Table
             'foreignKey' => 'user_id',
             'dependent' => true
         ]);
+
+        $this->hasMany('Notifications', [
+            'foreignKey' => 'user_id',
+            'propertyName' => 'latest_notifications',
+            'finder' => 'latestByUser'
+        ]);
     }
 
     /**

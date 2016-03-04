@@ -35,6 +35,10 @@ class RolesController extends AppController
         $role = $this->Roles->newEntity();
         if ($this->request->is('post')) {
             $role = $this->Roles->patchEntity($role, $this->request->data);
+            if ($role->type == 'COORDINATOR') {
+                $role->knowledge_id = null;
+                $role->knowledge = null;
+            }
             if ($this->Roles->save($role)) {
                 $this->Flash->success(__('O papel foi salvo.'));
                 return $this->redirect(['action' => 'index']);

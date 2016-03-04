@@ -63,11 +63,15 @@ class SubjectsTable extends Table
 
         $validator
             ->add('theoretical_workload', 'valid', ['rule' => 'numeric'])
+            ->add('theoretical_workload', 'range', ['rule' => ['range', 0, 'null'],
+                'message' => __('A carga horária não pode ser negativa')])
             ->requirePresence('theoretical_workload', 'create')
             ->notEmpty('theoretical_workload');
 
         $validator
             ->add('practical_workload', 'valid', ['rule' => 'numeric'])
+            ->add('practical_workload', 'range', ['rule' => ['range', 0, 'null'],
+                'message' => __('A carga horária não pode ser negativa')])
             ->requirePresence('practical_workload', 'create')
             ->notEmpty('practical_workload');
 
@@ -106,6 +110,24 @@ class SubjectsTable extends Table
             },
             ['errorField' => 'course_id', 'message' => __('Selecione um curso')]
         );
+
+        $checkWorkLoadFunction = function ($entity, $options) {
+            $workload = $entity->theoretical_workload + $entity->practical_workload;
+            return $workload > 0;
+        };
+        $rules->add(
+            $checkWorkLoadFunction, [
+                'errorField' => 'theoretical_workload',
+                'message' => __('A carga horária da disciplina não pode ser menor ou igual a zero')
+            ]
+        );
+        $rules->add(
+            $checkWorkLoadFunction, [
+                'errorField' => 'practical_workload',
+                'message' => __('A carga horária da disciplina não pode ser menor ou igual a zero')
+            ]
+        );
+
         return $rules;
     }
 }

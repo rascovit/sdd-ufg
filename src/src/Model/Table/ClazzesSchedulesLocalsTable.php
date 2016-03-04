@@ -28,7 +28,7 @@ class ClazzesSchedulesLocalsTable extends Table
         parent::initialize($config);
 
         $this->table('clazzes_schedules_locals');
-        $this->displayField('clazz_id');
+        $this->displayField('name');
         $this->primaryKey(['clazz_id', 'schedule_id', 'local_id', 'week_day']);
 
         $this->belongsTo('Clazzes', [

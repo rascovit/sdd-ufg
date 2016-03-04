@@ -8,6 +8,8 @@ use Cake\ORM\Rule\IsUnique;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use Cake\Filesystem\Folder;
+use Cake\Filesystem\File;
 
 /**
  * Clazzes Model
@@ -85,6 +87,8 @@ class ClazzesTable extends Table
 
         $validator
             ->add('vacancies', 'valid', ['rule' => 'numeric'])
+            ->add('vacancies', 'stocking', ['rule' => ['range', 1, 'null'],
+                'message' => __('O número de vagas não pode menor ou igual a zero')])
             ->requirePresence('vacancies', 'create')
             ->notEmpty('vacancies');
 
@@ -128,15 +132,137 @@ class ClazzesTable extends Table
             new IsUnique(['name', 'process_id', 'subject_id']),
             [
                 'errorField' => 'name',
-                'message' => __('Já existe uma turma para esta disciplina cadastrada neste processo de distribuição')
+                'message' => __('Essa turma já está cadastrada neste processo de distribuição')
             ]
         );
 
         return $rules;
     }
 
-	
-	public function getAllClazzesNotTeachers(){
+    public function isTeacherSubscribed($teacherId, $clazzId)
+    {
+        $isSubscribed = $this->find('all')->matching('ClazzesTeachers')
+            ->where([
+                'ClazzesTeachers.teacher_id' => $teacherId,
+                'ClazzesTeachers.clazz_id' => $clazzId
+            ])->toArray();
+
+        return !empty($isSubscribed);
+    }
+
+    /**
+     * Finds clazzes by filters
+     *
+     * @param $filters
+     * @return Query
+     */
+    public function findByFilters($filters)
+    {
+        /** @var Query $clazzes */
+        $clazzes = $this->find('all')->contain([
+            'Processes', 'Subjects.Knowledges', 'ClazzesTeachers.Teachers.Users',
+            'ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules'
+        ]);
+
+        $conditions = [];
+        if(isset($filters) && is_array($filters)) {
+            if(isset($filters['process']) && $filters['process'] != 0) {
+                $conditions['Clazzes.process_id'] = $filters['process'];
+            }
+
+            if(isset($filters['knowledge']) && $filters['knowledge'] != 0) {
+                $conditions['Subjects.knowledge_id'] = $filters['knowledge'];
+            }
+
+            if(isset($filters['subject']) && $filters['subject'] != 0) {
+                $conditions['Subjects.id'] = $filters['subject'];
+            }
+
+            if(isset($filters['status']) && !empty($filters['status'])) {
+                $closedClazzesId = [0];
+                $conflictClazzesId = [0];
+
+                if($filters['status'] == 'CLOSED' || $filters['status'] == 'OPENED') {
+                    $closedClazzes = $this->find()
+                        ->select(['Clazzes.id'])
+                        ->matching('ClazzesTeachers')
+                        ->where([
+                            'or' => [
+                                [
+                                    'ClazzesTeachers.status' => 'SELECTED'
+                                ],
+                                [
+                                    'ClazzesTeachers.status' => 'REJECTED'
+                                ]
+                            ]
+                        ])
+                        ->group(['Clazzes.id']);
+
+                    foreach($closedClazzes as $closedClazz) {
+                        $closedClazzesId[] = $closedClazz->id;
+                    }
+
+                    if($filters['status'] == 'CLOSED') {
+                        $conditions['Clazzes.id IN'] = $closedClazzesId;
+                    }
+                }
+
+                if($filters['status'] == 'CONFLICT' || $filters['status'] == 'OPENED') {
+                    $conflictClazzes = $this->find()
+                        ->select(['Clazzes.id', 'Clazzes__count' => 'count(Clazzes.id)'])
+                        ->matching('ClazzesTeachers')
+                        ->where([
+                            'ClazzesTeachers.status' => 'PENDING'
+                        ])
+                        ->having([
+                            'Clazzes__count >' => 1
+                        ])
+                        ->group(['Clazzes.id']);
+
+                    foreach($conflictClazzes as $conflictClazz) {
+                        $conflictClazzesId[] = $conflictClazz->id;
+                    }
+
+                    if($filters['status'] == 'CONFLICT') {
+                        $conditions['Clazzes.id IN'] = $conflictClazzesId;
+                    }
+                }
+
+                if($filters['status'] == 'OPENED') {
+                    $notOppened = array_merge($closedClazzesId, $conflictClazzesId);
+                    $conditions['Clazzes.id NOT IN'] = $notOppened;
+                }
+            }
+
+            if(isset($filters['teachers']) && is_array($filters['teachers'])) {
+                $clazzes->matching('ClazzesTeachers')->group(['Clazzes.id']);
+                $conditions['AND']['ClazzesTeachers.teacher_id IN'] = $filters['teachers'];
+
+                if(isset($filters['only-selected']) && $filters['only-selected'] == true) {
+                    $conditions['AND']['ClazzesTeachers.status'] = 'SELECTED';
+                }
+            }
+
+            if(isset($filters['schedules']) && is_array($filters['schedules'])) {
+                $clazzes->matching('ClazzesSchedulesLocals')->group(['Clazzes.id']);
+                foreach($filters['schedules'] as $schedule) {
+                    $schedule = explode(";", $schedule);
+                    $conditions['AND']['OR'][] = [
+                        'ClazzesSchedulesLocals.schedule_id' => $schedule[1],
+                        'ClazzesSchedulesLocals.local_id' => $schedule[2]
+                        //'ClazzesSchedulesLocals.week_day' => $schedule[3]
+                    ];
+                }
+            }
+        }
+
+        $clazzes->where($conditions);
+
+        return $clazzes;
+    }
+
+	public function getAllClazzesNotTeachers()
+    {
 		$clazzesTemp = $this
 			->find('all')
 			->contain([
@@ -150,18 +276,19 @@ class ClazzesTable extends Table
 				}
 			])
 			->hydrate(false)->toArray();
-			
+
 		$clazzes = [];
 		foreach($clazzesTemp as $clazzTemp){
 			if($clazzTemp['teachers'] == null){
 				$clazzes[] = $clazzTemp;
 			}
 		}
-		
+
 		return $clazzes;
 	}
-	
-	public function getAllClazzesWithSubjctsTeachers(){
+
+	public function getAllClazzesWithSubjctsTeachers()
+    {
 		return $this
 			->find('all')
 			->contain([
@@ -175,5 +302,34 @@ class ClazzesTable extends Table
 				}
 			])
 			->hydrate(false)->toArray();
+	}
+	
+	/**
+	 * Check if the file name is valid.
+	 * @access public
+	 * @param String $fileName
+	 * @return if the image is valid
+	*/ 
+	public function checkName($fileName)
+	{
+		return (bool) ((preg_match("`^[-0-9A-Z_\.\\s]+$`i",$fileName) && mb_strlen($fileName,"UTF-8") < 225) ? true : false);
+	}
+
+	
+	/**
+	 * Check if the directory exists. If not, then the system will create it.
+	 * @access public
+	 * @param String $dir
+	 * @return the selected folder
+	*/ 
+	public function checkDirectory($dir)
+	{
+		if (!is_dir($dir)){
+			$folder = new Folder();
+			$folder->create($dir);
+			return $folder;
+		} else {
+			return new Folder($dir);
+		}
 	}
 }

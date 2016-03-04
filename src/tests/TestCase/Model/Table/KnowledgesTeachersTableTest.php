@@ -24,12 +24,13 @@ class KnowledgesTeachersTableTest extends TestCase
         'app.subjects',
         'app.courses',
         'app.clazzes',
-        'app.schedules',
-        'app.locals',
         'app.processes',
         'app.process_configurations',
         'app.processes_process_configurations',
         'app.clazzes_teachers',
+        'app.clazzes_schedules_locals',
+        'app.schedules',
+        'app.locals',
         'app.users'
     ];
 

@@ -7,11 +7,12 @@
         <li class="treeview">
             <a href="#"><i class="fa fa-gavel"></i> <span><?= __('Distribuição de disciplinas') ?></span> <i class="fa fa-angle-left pull-right"></i></a>
             <ul class="treeview-menu">
-                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Processos em aberto'), ['controller' => 'processes', 'action' => 'opened'], ['escape' => false]) ?></li>
-                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Turmas em aberto'), ['controller' => 'clazzes', 'action' => 'listOpenedClazzes'], ['escape' => false]) ?></li>
-				<li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Minhas inscrições'), ['controller' => 'clazzes', 'action' => 'my_intents'], ['escape' => false]) ?></li>
+                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Processos em aberto'), ['controller' => 'processes', 'action' => 'index'], ['escape' => false]) ?></li>
+                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Turmas em aberto'), ['controller' => 'clazzes', 'action' => 'index', '?' => ['status' => 'OPENED']], ['escape' => false]) ?></li>
+				<li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Minhas inscrições'), ['controller' => 'clazzes', 'action' => 'index', '?' => ['teachers' => [$loggedUser->teacher->id]]], ['escape' => false]) ?></li>
             </ul>
         </li>
+        <?php if($loggedUser !== false && $loggedUser->canAdmin()): ?>
         <li class="treeview">
             <a href="#"><i class="fa fa-gear"></i> <span><?= __('Administração') ?></span> <i class="fa fa-angle-left pull-right"></i></a>
             <ul class="treeview-menu">
@@ -19,6 +20,7 @@
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Cursos'), ['controller' => 'courses'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Disciplinas'), ['controller' => 'subjects'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Docentes'), ['controller' => 'teachers'], ['escape' => false]) ?></li>
+                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Usuários'), ['controller' => 'users'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Locais de aula'), ['controller' => 'locals'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Horários de aula'), ['controller' => 'schedules'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Processos de distribuição'), ['controller' => 'processes'], ['escape' => false]) ?></li>
@@ -29,5 +31,6 @@
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Reverter distribuição'), ['controller' => 'processes', 'action' => 'revert'], ['escape' => false]) ?></li>
             </ul>
         </li>
+        <?php endif; ?>
     </ul>
 </section>

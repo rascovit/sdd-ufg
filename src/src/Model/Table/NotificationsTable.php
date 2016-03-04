@@ -2,9 +2,11 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\Notification;
+use App\Model\Entity\User;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 use Cake\Validation\Validator;
 
 /**
@@ -57,7 +59,6 @@ class NotificationsTable extends Table
 
         $validator
             ->add('read', 'valid', ['rule' => 'boolean'])
-            ->requirePresence('read', 'create')
             ->notEmpty('read');
 
         return $validator;
@@ -74,5 +75,43 @@ class NotificationsTable extends Table
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'));
         return $rules;
+    }
+
+    /**
+     * Finds Latest notifications by user
+     *
+     * @param Query $query
+     * @param array $options
+     * @return $this
+     */
+    public function findLatestByUser(Query $query, array $options)
+    {
+        $query->where(['Notifications.read' => false])
+            ->limit(10)
+            ->orderDesc('Notifications.id')
+            ->formatResults(function($notifications) {
+                $count = $this->find()->where(['Notifications.read' => false])->count();
+                foreach($notifications as $notification) {
+                    $notification->count = $count;
+                }
+                return $notifications;
+            });
+        return $query;
+    }
+
+    /**
+     * Registers a new notification.
+     * @param array $notification containing the notification data.
+     * @return bool true if the notification has successfully saved or false if not.
+     */
+    public static function register($notification)
+    {
+        $notificationTable = TableRegistry::get('Notifications');
+        $notification = $notificationTable->newEntity($notification);
+        if($notificationTable->save($notification)) {
+            return True;
+        }
+
+        return False;
     }
 }

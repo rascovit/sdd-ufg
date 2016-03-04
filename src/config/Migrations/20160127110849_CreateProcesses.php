@@ -43,7 +43,7 @@ class CreateProcesses extends AbstractMigration
                 'null' => false,
             ])
             ->addColumn('status', 'string', [
-                'default' => 'OPEN',
+                'default' => 'OPENED',
                 'limit' => '50',
                 'null' => false,
             ])

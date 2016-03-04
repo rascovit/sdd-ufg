@@ -1,24 +1,30 @@
-<nav class="large-3 medium-4 columns" id="actions-sidebar">
-    <ul class="side-nav">
-        <li class="heading"><?= __('Actions') ?></li>
-        <li><?= $this->Html->link(__('List Users'), ['action' => 'index']) ?></li>
-        <li><?= $this->Html->link(__('List Teachers'), ['controller' => 'Teachers', 'action' => 'index']) ?></li>
-        <li><?= $this->Html->link(__('New Teacher'), ['controller' => 'Teachers', 'action' => 'add']) ?></li>
-    </ul>
-</nav>
-<div class="users form large-9 medium-8 columns content">
-    <?= $this->Form->create($user) ?>
-    <fieldset>
-        <legend><?= __('Add User') ?></legend>
-        <?php
-            echo $this->Form->input('login');
-            echo $this->Form->input('email');
-            echo $this->Form->input('name');
-            echo $this->Form->input('password');
-            echo $this->Form->input('is_admin');
-            echo $this->Form->input('teacher_id', ['options' => $teachers, 'empty' => true]);
-        ?>
-    </fieldset>
-    <?= $this->Form->button(__('Submit')) ?>
-    <?= $this->Form->end() ?>
+<?php $this->assign('title', 'Usuários'); ?>
+<?php $this->start('breadcrumb'); ?>
+<li><?= $this->Html->link('<i class="fa fa-dashboard"></i>' . __('Dashboard'), '/', ['escape' => false]) ?></li>
+<li><?= $this->Html->link(__('Usuários'), ['action' => 'index']) ?></li>
+<li class="active">Adicionar</li>
+<?php $this->end(); ?>
+
+<?= $this->Form->create($user) ?>
+<div class="row">
+    <div class="col-xs-8">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Adicionar usuário</h3>
+            </div>
+            <div class="box-body">
+                <?php
+                    echo $this->Form->input('login', ['label' => 'Login', 'placeholder' => 'Login']);
+                    echo $this->Form->input('email', ['label' => 'Email', 'placeholder' => 'Email']);
+                    echo $this->Form->input('name', ['label' => 'Nome', 'placeholder' => 'Nome']);
+                    echo $this->Form->input('password', ['label' => 'Senha', 'placeholder' => 'Senha']);
+                    echo $this->Form->input('is_admin', ['label' => 'Administrador']);
+                ?>
+            </div>
+            <div class="box-footer clearfix">
+                <?= $this->Form->button(__('Salvar'), ['class' => 'btn btn-success']) ?>
+            </div>
+        </div>
+    </div>
 </div>
+<?= $this->Form->end() ?>

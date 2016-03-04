@@ -1,4 +1,4 @@
-<?php $this->assign('title', 'Processos de distribuição'); ?>
+<?php $this->assign('title', 'Papéis do Docente'); ?>
 <?php $this->start('breadcrumb'); ?>
     <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
     <li class="active">Here</li>

@@ -18,6 +18,9 @@ class ProcessConfigurationsController extends AppController
      */
     public function index()
     {
+        $this->paginate = [
+            'contain' => []
+        ];
         $this->set('processConfigurations', $this->paginate($this->ProcessConfigurations));
         $this->set('_serialize', ['processConfigurations']);
     }
@@ -49,10 +52,10 @@ class ProcessConfigurationsController extends AppController
         if ($this->request->is('post')) {
             $processConfiguration = $this->ProcessConfigurations->patchEntity($processConfiguration, $this->request->data);
             if ($this->ProcessConfigurations->save($processConfiguration)) {
-                $this->Flash->success(__('The process configuration has been saved.'));
+                $this->Flash->success(__('A configuração de processo foi salva.'));
                 return $this->redirect(['action' => 'index']);
             } else {
-                $this->Flash->error(__('The process configuration could not be saved. Please, try again.'));
+                $this->Flash->error(__('A configuração de processo nao pode ser salva. Tente novamente.'));
             }
         }
         $this->set(compact('processConfiguration'));
@@ -74,10 +77,10 @@ class ProcessConfigurationsController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $processConfiguration = $this->ProcessConfigurations->patchEntity($processConfiguration, $this->request->data);
             if ($this->ProcessConfigurations->save($processConfiguration)) {
-                $this->Flash->success(__('The process configuration has been saved.'));
+                $this->Flash->success(__('A configuração de processo foi salva.'));
                 return $this->redirect(['action' => 'index']);
             } else {
-                $this->Flash->error(__('The process configuration could not be saved. Please, try again.'));
+                $this->Flash->error(__('A configuração de processo nao pode ser salva. Tente novamente.'));
             }
         }
         $this->set(compact('processConfiguration'));
@@ -96,9 +99,9 @@ class ProcessConfigurationsController extends AppController
         $this->request->allowMethod(['post', 'delete']);
         $processConfiguration = $this->ProcessConfigurations->get($id);
         if ($this->ProcessConfigurations->delete($processConfiguration)) {
-            $this->Flash->success(__('The process configuration has been deleted.'));
+            $this->Flash->success(__('A configuração de processo foi apagada.'));
         } else {
-            $this->Flash->error(__('The process configuration could not be deleted. Please, try again.'));
+            $this->Flash->error(__('A configuração de processo nao pode ser apagada. Tente novamente.'));
         }
         return $this->redirect(['action' => 'index']);
     }

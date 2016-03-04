@@ -14,6 +14,32 @@ use Cake\Event\Event;
  */
 class ProcessesController extends AppController
 {
+
+    public function isAuthorized($user)
+    {
+        // Need to be logged
+        $loggedActions = ['index', 'view'];
+        if (in_array($this->request->action, $loggedActions) && $this->loggedUser !== false) {
+            return true;
+        }
+		
+		//Only allowed to clone closed process
+		if (in_array($this->request->action, ['reuseProcess'])) {
+			$processId = (int)$this->request->params['pass'][0];
+
+			$process = $this->Processes->get($processId);
+
+			if ($this->loggedUser !== false && $this->loggedUser->canAdmin() 
+					&& $process->status == 'CLOSED') {
+				return true;
+			}
+			
+			return false;
+		}
+
+        return parent::isAuthorized($user);
+    }
+
     /**
      * Index method
      *
@@ -56,7 +82,7 @@ class ProcessesController extends AppController
         $process = $this->Processes->newEntity();
         if ($this->request->is('post')) {
             $process = $this->Processes->patchEntity($process, $this->request->data);
-            $process->status = 'OPEN';
+            $process->status = 'OPENED';
             if ($this->Processes->save($process)) {
                 $this->Flash->success(__('O processo foi salvo.'));
                 return $this->redirect(['action' => 'index']);
@@ -81,6 +107,7 @@ class ProcessesController extends AppController
         $process = $this->Processes->get($id, [
             'contain' => ['ProcessConfigurations', 'Clazzes']
         ]);
+
         if ($this->request->is(['patch', 'post', 'put'])) {
             $process = $this->Processes->patchEntity($process, $this->request->data);
             if ($this->Processes->save($process)) {
@@ -145,19 +172,19 @@ class ProcessesController extends AppController
 		$clazzes = Distribution::generateDistribution($clazzes, $teachers);
 		$this->response->body(json_encode($clazzes, JSON_PRETTY_PRINT));
 	}
-	
+
 	public function distribute(){
         $clazzes = $this->Processes->Clazzes->find('all')->contain(['ClazzesTeachers.Teachers.Users', 'Locals', 'Subjects']);
         $clazzes = $this->paginate($clazzes);
         $this->set('clazzes', $clazzes);
 	}
-	
+
 	public function simulate(){
         $clazzes = $this->Processes->Clazzes->find('all')->contain(['ClazzesTeachers.Teachers.Users', 'Locals', 'Subjects']);
         $clazzes = $this->paginate($clazzes);
         $this->set('clazzes', $clazzes);
 	}
-	
+
 	public function revert(){
         $this->paginate = [
             'contain' => []
@@ -166,7 +193,7 @@ class ProcessesController extends AppController
         $this->set('_serialize', ['processes']);
 	}
 
-    
+
     public function cloneProcess($id = null)
     {
         $clonedProcess = $this->Processes->get($id, [
@@ -175,7 +202,7 @@ class ProcessesController extends AppController
 
         if ($this->request->is('post')) {
             $process = $this->Processes->patchEntity($process, $this->request->data);
-            $process->status = 'OPEN';
+            $process->status = 'OPENED';
             if ($this->Processes->save($process)) {
                 $this->Flash->success(__('O processo foi clonado.'));
                 return $this->redirect(['action' => 'index']);
@@ -208,6 +235,52 @@ class ProcessesController extends AppController
 
         $this->set(compact('$process'));
         $this->set('_serialize', ['$process']);
+    }
+	
+	
+	public function reuseProcess($id)
+    {
+        $originalProcess = $this->Processes->get($id, [
+            'contain' => ['Clazzes', 'Clazzes.ClazzesTeachers', 'Clazzes.ClazzesSchedulesLocals', 'ProcessesProcessConfigurations'],
+        ]);
+
+		unset($originalProcess->id);
+		$originalProcess->status = 'OPENED';
+		$originalProcess->name = $originalProcess->name . '(Clonado)';
+		
+		foreach($originalProcess->clazzes as $item => $value) {
+
+			unset($originalProcess->clazzes[$item]->id);
+			unset($originalProcess->clazzes[$item]->process_id);
+			$originalProcess->clazzes[$item]->isNew(true);
+			
+			foreach($value->intents as $i => $v) {
+				unset($originalProcess->clazzes[$item]->intents[$i]->clazz_id);
+				$originalProcess->clazzes[$item]->intents[$i]->isNew(true);
+			}
+			
+			foreach($value->scheduleLocals as $i => $v) {
+				unset($originalProcess->clazzes[$item]->scheduleLocals[$i]->clazz_id); 
+				$originalProcess->clazzes[$item]->scheduleLocals[$i]->isNew(true);
+			}
+		}
+
+		foreach($originalProcess->processes_process_configurations as $item => $value) {
+			unset($originalProcess->processes_process_configurations[$item]->process_id); 
+		}
+		
+		$clonedProcess = $this->Processes->newEntity($originalProcess->toArray(),
+				['associated' => ['Clazzes', 'Clazzes.ClazzesTeachers', 'Clazzes.ClazzesSchedulesLocals', 'ProcessesProcessConfigurations']]);
+		
+		$clonedProcess->clazzes = $originalProcess->clazzes;
+
+		if ($this->Processes->save($clonedProcess)) {
+            $this->Flash->success(__('Processo clonado com sucesso!'));
+        } else {
+            $this->Flash->error(__('Ocorreu um erro ao tentar clonar o Processo. Por favor, tente novamente.'));
+        }
+        return $this->redirect(['action' => 'index']);
+		
     }
 
 }

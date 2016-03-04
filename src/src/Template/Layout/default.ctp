@@ -15,6 +15,7 @@
         'https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css',
         '/plugins/datepicker/datepicker3.css',
         '/plugins/select2/select2.min.css',
+        '/plugins/datatables/dataTables.bootstrap.css',
         '/plugins/adminLTE/css/AdminLTE.min.css',
         '/plugins/adminLTE/css/skin-blue.min.css',
         'sdd-ufg.css'
@@ -63,6 +64,7 @@
 
                 <section class="content">
                     <?= $this->Flash->render() ?>
+                    <?= $this->Flash->render('auth') ?>
                     <?= $this->fetch('content') ?>
                 </section>
             </div>
@@ -81,6 +83,7 @@
             '/plugins/datepicker/locales/bootstrap-datepicker.pt-BR.js',
             '/plugins/select2/select2.full.min.js',
             '/plugins/select2/i18n/pt-BR.js',
+            '/plugins/datatables/jquery.dataTables.min.js',
             '/plugins/adminLTE/js/app.min.js',
             'sdd-ufg.js'
         ]) ?>

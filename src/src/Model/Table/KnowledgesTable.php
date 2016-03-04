@@ -3,6 +3,7 @@ namespace App\Model\Table;
 
 use App\Model\Entity\Knowledge;
 use Cake\ORM\Query;
+use Cake\ORM\Rule\IsUnique;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -64,5 +65,25 @@ class KnowledgesTable extends Table
             ->notEmpty('name');
 
         return $validator;
+    }
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
+    public function buildRules(RulesChecker $rules)
+    {
+        $rules->add(
+            new IsUnique(['name']),
+            [
+                'errorField' => 'name',
+                'message' => __('Núcleo de conhecimento já cadastrado')
+            ]
+        );
+
+        return $rules;
     }
 }

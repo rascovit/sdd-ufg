@@ -41,4 +41,39 @@ class Process extends Entity
         }
         return '<span class="label label-success">Aberto</span>';
     }
+
+    public function _getInitialDateFormated()
+    {
+        return $this->formatDate($this->initial_date);
+    }
+
+    public function _getTeacherIntentDateFormated()
+    {
+        return $this->formatDate($this->teacher_intent_date);
+    }
+
+    public function _getPrimaryDistribuitionDateFormated()
+    {
+        return $this->formatDate($this->primary_distribution_date);
+    }
+
+    public function _getSubstituteIntentDateFormated()
+    {
+        return $this->formatDate($this->substitute_intent_date);
+    }
+
+    public function _getSecondaryDistribuitionDateFormated()
+    {
+        return $this->formatDate($this->secondary_distribution_date);
+    }
+
+    public function _getFinalDateFormated()
+    {
+        return $this->formatDate($this->final_date);
+    }
+
+    private function formatDate($date)
+    {
+        return $date->format('dd-MM-YYYY');
+    }
 }

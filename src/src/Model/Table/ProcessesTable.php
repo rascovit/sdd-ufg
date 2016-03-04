@@ -38,6 +38,11 @@ class ProcessesTable extends Table
             'targetForeignKey' => 'process_configuration_id',
             'joinTable' => 'processes_process_configurations'
         ]);
+		
+		$this->hasMany('ProcessesProcessConfigurations', [
+            'foreignKey' => 'process_id',
+            'propertyName' => 'processes_process_configurations'
+        ]);
     }
 
     /**
@@ -81,6 +86,11 @@ class ProcessesTable extends Table
             ->add('final_date', 'valid', ['rule' => ['date', 'dmy']])
             ->requirePresence('final_date', 'create')
             ->notEmpty('final_date');
+
+        $validator
+            ->add('status', 'enum', ['rule' => ['inList', ['OPENED', 'CLOSED'], true]])
+            ->requirePresence('status', 'create')
+            ->notEmpty('status');
 
         return $validator;
     }

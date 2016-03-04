@@ -4,8 +4,10 @@ namespace App\Model\Table;
 use App\Model\Entity\Teacher;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
+use Cake\ORM\Rule\IsUnique;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use \DateTime;
 
 /**
  * Teachers Model
@@ -74,11 +76,6 @@ class TeachersTable extends Table
             ->allowEmpty('url_lattes');
 
         $validator
-            ->add('entry_date', 'valid', ['rule' => 'date'])
-            ->requirePresence('entry_date', 'create')
-            ->notEmpty('entry_date');
-
-        $validator
             ->allowEmpty('formation');
 
         $validator
@@ -94,13 +91,65 @@ class TeachersTable extends Table
             ->notEmpty('rg');
 
         $validator
-            ->requirePresence('cpf', 'create')
+            ->add('cpf','custom',[
+                'rule' => function($value, $context){
+                    $cpf = $context['data']['cpf'];
+
+                    if (strlen($cpf) != 11) {
+                        return false;
+                    }
+                    for ($t = 9; $t < 11; $t++) {
+                        for ($d = 0, $c = 0; $c < $t; $c++) {
+                            $d += $cpf{$c} * (($t + 1) - $c);
+                        }
+
+                        $d = ((10 * $d) % 11) % 10;
+
+                        if ($cpf{$c} != $d) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                'message' => 'CPF inválido',
+            ])
             ->notEmpty('cpf');
 
         $validator
-            ->add('birth_date', 'valid', ['rule' => 'date'])
+            ->add('workload', 'valid', ['rule' => 'numeric'])
+            ->add('workload', 'valid', ['rule' => ['range', 0, 512], 'message' => 'Carga horária não pode ser negativa!']);
+
+        $validator
+            ->add('birth_date', 'valid', ['rule' => ['date', 'dmy']])
+            ->add('birth_date','custom',[
+                'rule'=>  function($value, $context){
+                    $currentDate = (new \DateTime())->getTimestamp();
+                    $birthDate = strtotime($context['data']['birth_date']);
+                    if (($currentDate - $birthDate) / (60*60*24*365) < 16) {
+                        return false;
+                    }
+                    return true;
+                },
+                'message'=>'Professor deve ter pelo menos dezesseis anos de idade',
+            ])
             ->requirePresence('birth_date', 'create')
             ->notEmpty('birth_date');
+
+        $validator
+            ->add('entry_date', 'valid', ['rule' => ['date', 'dmy']])
+            ->add('entry_date','custom',[
+                'rule'=>  function($value, $context){
+                    $currentDate = (new \DateTime())->getTimestamp();
+                    $entryDate = strtotime($context['data']['entry_date']);
+                    $birthDate = strtotime($context['data']['birth_date']);
+                    if ($entryDate > $currentDate || $entryDate < $birthDate) {
+                        return false;
+                    }
+                    return true;
+                },
+                'message'=>'Data de entrada deve ser menor que a data atual e maior que a data de nascimento',
+            ])
+            ->notEmpty('entry_date');
 
         $validator
             ->allowEmpty('situation');
@@ -118,6 +167,14 @@ class TeachersTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'));
+
+        $rules->add(
+            new IsUnique(['cpf']),
+            [
+                'errorField' => 'cpf',
+                'message' => __('Já existe um docente com esse CPF!')
+            ]
+        );
         return $rules;
     }
 

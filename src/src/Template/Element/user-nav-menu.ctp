@@ -1,36 +1,59 @@
-<?php
-    $notifications = !isset($notifications) ? [] : $notifications;
-    $notificationLabel = count($notifications) > 0 ? '<span class="label label-warning">'.count($notifications).'</span>' : '';
-?>
 <div class="navbar-custom-menu">
     <ul class="nav navbar-nav">
         <!-- Notifications Menu -->
         <li class="dropdown notifications-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-bell-o"></i>
-                <?= $notificationLabel ?>
+                <?php if(!empty($loggedUser->latest_notifications)): ?>
+                    <span class="label label-warning"><?= $loggedUser->latest_notifications[0]->count > 99 ? '99+' : $loggedUser->latest_notifications[0]->count ?></span>
+                <?php endif; ?>
             </a>
             <ul class="dropdown-menu">
-                <li class="header"><?= __(sprintf('Você possui %d notificações', count($notifications))) ?></li>
+                <li class="header"><?= __(sprintf('Você possui %d notificações', $loggedUser->latest_notifications[0]->count)) ?></li>
                 <li>
                     <ul class="menu">
-                        <?php if(count($notifications) < 1): ?>
+                        <?php if(count($loggedUser->latest_notifications) < 1): ?>
                         <li>
                             <a href="#">
                                 <i class="fa fa-circle-o text-yellow"></i> <?= __('Nenhuma notificação pendente') ?>
                             </a>
                         </li>
-                        <?php endif; ?>
-                        <?php foreach($notifications as $notification): ?>
+                        <?php else: ?>
+                        <?php
+                            foreach($loggedUser->latest_notifications as $notification):
+                                switch($notification->type) {
+                                    case "ERROR":
+                                        $classes = "fa-exclamation-circle text-red";
+                                        break;
+                                    case "ALERT":
+                                        $classes = "fa-warning text-yellow";
+                                        break;
+                                    case "INFO":
+                                    default:
+                                        $classes = "fa-info-circle text-blue";
+                                        break;
+                                }
+                        ?>
                         <li>
-                            <a href="#">
-                                <i class="fa fa-circle-o text-blue"></i> <?= $notification ?>
-                            </a>
+                            <?= $this->Html->link(
+                                '<i class="fa '.$classes.'"></i> ' . $notification->description,
+                                [
+                                    'controller' => 'notifications',
+                                    'action' => 'index',
+                                    '?' => ['notification' => $notification->id]
+                                ],
+                                [
+                                    'escape' => false
+                                ])
+                            ?>
                         </li>
                         <?php endforeach; ?>
+                        <?php endif; ?>
                     </ul>
                 </li>
-                <li class="footer"><a href="#"><?= __('Visualizar todas') ?></a></li>
+                <li class="footer">
+                    <?= $this->Html->link(__('Visualizar todas'), ['controller' => 'notifications']) ?>
+                </li>
             </ul>
         </li>
 
@@ -38,19 +61,19 @@
         <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <?= $this->Gravatar->generate(
-                    $this->Auth->get("User.email"),
+                    $loggedUser->email,
                     [
                         'image-options' => ['class' => 'user-image'],
                         'size' => 160,
                         'default' => 'mm'
                     ]
                 ) ?>
-                <span class="hidden-xs"><?= $this->Auth->get("User.name") ?></span>
+                <span class="hidden-xs"><?= $loggedUser->name ?></span>
             </a>
             <ul class="dropdown-menu">
                 <li class="user-header">
                     <?= $this->Gravatar->generate(
-                        $this->Auth->get("User.email"),
+                        $loggedUser->email,
                         [
                             'image-options' => ['class' => 'img-circle'],
                             'size' => 160,
@@ -58,13 +81,13 @@
                         ]
                     ) ?>
                     <p>
-                        <?= $this->Auth->get("User.name") ?>
-                        <small>Administrador</small>
+                        <?= $loggedUser->name ?>
+                        <small><?= $loggedUser->title ?></small>
                     </p>
                 </li>
                 <li class="user-footer">
                     <div class="pull-left">
-                        <?= $this->Html->link(__('Minha conta'), ['controller' => 'users', 'action' => 'my_account'], ['class' => 'btn btn-default btn-flat']) ?>
+                        <?= $this->Html->link(__('Minha conta'), ['controller' => 'users', 'action' => 'myAccount'], ['class' => 'btn btn-default btn-flat']) ?>
                     </div>
                     <div class="pull-right">
                         <?= $this->Html->link(__('Sair'), ['controller' => 'users', 'action' => 'logout'], ['class' => 'btn btn-default btn-flat']) ?>

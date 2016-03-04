@@ -29,4 +29,9 @@ class ClazzesSchedulesLocal extends Entity
     protected $_accessible = [
         '*' => true
     ];
+
+    public function _getName()
+    {
+        return $this->schedule->period . ': ' . $this->local->fullPath;
+    }
 }

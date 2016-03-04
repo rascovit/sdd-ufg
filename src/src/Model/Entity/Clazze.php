@@ -3,6 +3,9 @@ namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
+use Cake\View\Helper\HtmlHelper;
+use Cake\View\View;
+use Cake\Filesystem\Folder;
 
 /**
  * Clazze Entity.
@@ -55,10 +58,10 @@ class Clazze extends Entity
     public function _getStatus()
     {
         if(!isset($this->intents) || empty($this->intents)) {
-            return "OPEN";
+            return "OPENED";
         }
 
-        $status = (count($this->intents) > 1) ? "CONFLICT" : "OPEN";
+        $status = (count($this->intents) > 1) ? "CONFLICT" : "OPENED";
         foreach($this->intents as $intent) {
             if($intent->status == "SELECTED") {
                 $status = "CLOSED";
@@ -79,7 +82,7 @@ class Clazze extends Entity
                 $displayName = __('Fechado');
                 $lblClass = 'default';
                 break;
-            case "OPEN":
+            case "OPENED":
             default:
                 $displayName = __('Aberto');
                 $lblClass = 'success';
@@ -87,6 +90,11 @@ class Clazze extends Entity
         }
 
         return '<span class="label label-'.$lblClass.'">'.$displayName.'</span>';
+    }
+
+    public function _getIsClosed()
+    {
+        return ($this->status == 'CLOSED');
     }
 
     public function _getSelectedTeachers()
@@ -134,26 +142,43 @@ class Clazze extends Entity
         return $selectedTeachers;
     }
 
-    public function _getEffectiveTeachers() {
-        if(!isset($this->teachers) || empty($this->teachers)) {
-            return [];
-        }
+    public function _getSelectedTeachersNames() {
+        $display = '<a class="teachers-names">' . __("Sem docente atribuído") . '</a>';
 
-        $effectiveTeachers = [];
-        foreach($this->teachers as $teacher) {
-            if($teacher->_joinData->status == 'APPROVED') {
-                $effectiveTeachers[] = $teacher;
+        if(!empty($this->selectedTeachers)) {
+            $display = "";
+            $htmlHelper = new HtmlHelper(new View());
+            foreach($this->selectedTeachers as $teacher) {
+                $display .= $htmlHelper->link($teacher->user->name, [
+                    'controller' => 'Teachers',
+                    'action' => 'view', $teacher->id
+                ], [
+                    'class' => 'teachers-names'
+                ]);
             }
         }
 
-        return $effectiveTeachers;
-    }
-
-    public function _getDisplayEffectiveTeachers() {
-        $display = "";
-        foreach($this->effectiveTeachers as $teacher) {
-            $display .= $teacher->user->name . '<br>';
-        }
         return $display;
+    }
+	
+	public function _getSelectedTeachersIds() {
+		$ids = array();
+        if(!empty($this->selectedTeachers)) {
+            foreach($this->selectedTeachers as $teacher) {
+                $ids[] = $teacher->id;
+            }
+        }
+        return $ids;
+    }
+	
+	public function _getFiles()
+    {
+        $files = array();
+		$dir = new Folder(WWW_ROOT.'/finishedClazzes/clazz-' . $this->id);
+		if ($dir) {
+			$files = $dir->find();
+		}
+		
+		return $files;
     }
 }

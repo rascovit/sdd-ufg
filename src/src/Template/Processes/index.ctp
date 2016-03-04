@@ -60,7 +60,8 @@
                                             'data-original-title' => __('Visualizar'),
                                         ]
                                     ) ?>
-                                    <?php if($process->status == 'OPEN' ): ?>
+									<?php if($loggedUser !== false && $loggedUser->canAdmin()): ?>
+                                    <?php if($process->status == 'OPENED' ): ?>
                                         <?= $this->Html->link(
                                             '',
                                             ['action' => 'edit', $process->id],
@@ -95,6 +96,19 @@
                                         );
                                         ?>
                                     <?php endif; ?>
+									<?php if($process->status == 'CLOSED' ): ?>
+                                        <?= $this->Html->link(
+                                            '',
+                                            ['action' => 'reuseProcess', $process->id],
+                                            [
+                                                'title' => __('Clonar Processo'),
+                                                'class' => 'btn btn-sm btn-primary glyphicon glyphicon-copy',
+                                                'data-toggle' => 'tooltip',
+                                                'data-original-title' => __('Clonar Processo'),
+                                            ]
+                                        ) ?>
+									<?php endif; ?>
+									<?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -25,8 +25,8 @@ class KnowledgesTeachersFixture extends TestFixture
         ],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['teacher_id', 'knowledge_id'], 'length' => []],
-            'knowledges_teachers_ibfk_2' => ['type' => 'foreign', 'columns' => ['teacher_id'], 'references' => ['teachers', 'id'], 'update' => 'cascade', 'delete' => 'cascade', 'length' => []],
             'knowledges_teachers_ibfk_1' => ['type' => 'foreign', 'columns' => ['knowledge_id'], 'references' => ['knowledges', 'id'], 'update' => 'cascade', 'delete' => 'cascade', 'length' => []],
+            'knowledges_teachers_ibfk_2' => ['type' => 'foreign', 'columns' => ['teacher_id'], 'references' => ['teachers', 'id'], 'update' => 'cascade', 'delete' => 'cascade', 'length' => []],
         ],
         '_options' => [
             'engine' => 'InnoDB',

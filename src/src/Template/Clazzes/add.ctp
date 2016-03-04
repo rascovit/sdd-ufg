@@ -17,7 +17,7 @@
                 echo $this->Form->input('process_id', ['label' => 'Processo de distribuição', 'options' => $processes]);
                 echo $this->Form->input('subject_id', ['label' => 'Disciplina', 'options' => $subjects]);
                 echo $this->Form->input('name', ['label' => 'Nome da turma', 'placeholder' => 'Nome da turma']);
-                echo $this->Form->input('vacancies', ['label' => 'Número de vagas', 'placeholder' => 'Número de vagas']);
+                echo $this->Form->input('vacancies', ['label' => 'Número de vagas', 'placeholder' => 'Número de vagas', 'min' => 0]);
                 echo $this->Form->input('schedules', ['type' => 'hidden']);
                 ?>
 

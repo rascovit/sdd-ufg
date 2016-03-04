@@ -32,4 +32,9 @@ class Subject extends Entity
         '*' => true,
         'id' => false,
     ];
+
+    public function _getWorkload()
+    {
+        return $this->theoretical_workload + $this->practical_workload;
+    }
 }

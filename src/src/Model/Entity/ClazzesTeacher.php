@@ -25,9 +25,7 @@ class ClazzesTeacher extends Entity
      * @var array
      */
     protected $_accessible = [
-        '*' => true,
-        'clazz_id' => false,
-        'teacher_id' => false,
+        '*' => true
     ];
 
     public function _getDisplayStatus()
@@ -53,6 +51,6 @@ class ClazzesTeacher extends Entity
 
     public function _getPriority()
     {
-        return 100;
+        return rand(100, 500);
     }
 }

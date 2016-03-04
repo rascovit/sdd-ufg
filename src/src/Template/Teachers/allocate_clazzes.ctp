@@ -78,6 +78,7 @@
 										echo $this->Form->label('start_time');
 										echo $this->Form->time('start_time'
 										, ['format' => '24'
+										, 'empty' => false
 										, 'default' => '00:00',
 										'hour' => [
 											'class' => 'form-control',
@@ -92,6 +93,7 @@
 										echo $this->Form->label('end_time');
 										echo $this->Form->time('end_time'
 										, ['format' => '24'
+										, 'empty' => false
 										, 'default' => '23:59',
 										'hour' => [
 											'class' => 'form-control',
@@ -107,7 +109,7 @@
 				</div>
 				<br>
 				<div class="row">
-					<div class="col-xs-12">
+					<div class="col-xs-12 table-responsive">
 						<fieldset>
 							<legend>Turmas em Aberto</legend>
 							<table class="table table-striped table-valign-middle">
@@ -133,11 +135,11 @@
 								<?php endif; ?>
 								<?php foreach ($clazzes as $clazz): ?>
 									<tr>
-										<td><?= h($clazz['Clazzes__id']) ?></td>
-										<td><?= h($clazz['Subjects__name']) ?></td>
+										<td><?= h($clazz->id) ?></td>
+										<td><?= h($clazz->subject->name) ?></td>
 										<td>
 										<?php 
-											foreach ($clazz['SchedulesLocals'] as $csl) {
+											foreach ($clazz->scheduleLocals as $csl) {
 												echo ($this->Utils->daysOfWeek()[$csl['week_day']]); ?>
 												<br>
 											<?php
@@ -145,58 +147,49 @@
 										?>
 										</td>
 										<td>
-										<?php 
-											foreach ($clazz['schedules'] as $s) {
-												echo (date('H:i:s', strtotime($s['start_time']))); ?>
-												<br>
-											<?php
-											}
-										?>
-										</td>
+                                            <?php foreach ($clazz->scheduleLocals as $s): ?>
+                                                <?= $s->schedule->start_time->format('H:i:s') ?>
+                                                <br>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td>
+                                            <?php foreach ($clazz->scheduleLocals as $s): ?>
+                                                <?= $s->schedule->end_time->format('H:i:s') ?>
+                                                <br>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td>
+                                            <?php foreach ($clazz->scheduleLocals as $s): ?>
+                                                <?= $s->local->fullPath ?>
+                                                <br>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td><?= h($clazz->subject->knowledge->name) ?></td>
+                                        <td><?= h($clazz->subject->course->name) ?></td>
+                                        <td><?= h($clazz->name) ?></td>
 										<td>
-										<?php 
-											foreach ($clazz['schedules'] as $s) {
-												echo (date('H:i:s', strtotime($s['end_time']))); ?>
-												<br>
-											<?php
-											}
-										?>
-										</td>
-										<td>
-										<?php 
-											foreach ($clazz['locals'] as $l) {
-												echo $l['name'] . ' - ' . $l['address']; ?>
-												<br>
-											<?php
-											}
-										?>
-										</td>
-										<td><?= h($clazz['Knowledges__name']) ?></td>
-										<td><?= h($clazz['Courses__name']) ?></td>
-										<td><?= h($clazz['Clazzes__name']) ?></td>
-										<td>
-											<?= $this->Html->link(
-												'',
-												['controller' => 'Clazzes', 'action' => 'view', $clazz['Clazzes__id']],
-												[
-													'title' => __('Visualizar'),
-													'class' => 'btn btn-sm btn-default glyphicon glyphicon-search',
-													'data-toggle' => 'tooltip',
-													'data-original-title' => __('Visualizar'),
-												]
-											) ?>
+                                            <?= $this->Html->link(
+                                                '',
+                                                ['controller' => 'Clazzes', 'action' => 'view', $clazz->id],
+                                                [
+                                                    'title' => __('Visualizar'),
+                                                    'class' => 'btn btn-sm btn-default glyphicon glyphicon-search',
+                                                    'data-toggle' => 'tooltip',
+                                                    'data-original-title' => __('Visualizar'),
+                                                ]
+                                            ) ?>
 											<?php 	$has_clazz = false;
 													foreach ($teacher->clazzes as $c) : 
-														if ($clazz['Clazzes__id'] == $c->id) { ?>
+														if ($clazz->id == $c->id) { ?>
 											
-														<?= $this->Form->button('<i id="icon-' . $clazz['Clazzes__id'] . '" class="fa fa-remove"></i><i id="icon-loading-' . $clazz['Clazzes__id'] . '" class="fa fa-spinner fa-spin" style="display:none;"></i>'
+														<?= $this->Form->button('<i id="icon-' . $clazz->id . '" class="fa fa-remove"></i><i id="icon-loading-' . $clazz->id . '" class="fa fa-spinner fa-spin" style="display:none;"></i>'
 															, array(
 																'type' => 'button',
-																'id' => 'button-' . $clazz['Clazzes__id'],
+																'id' => 'button-' . $clazz->id,
 																'class' => 'btn btn-sm btn-danger',
 																'data-toggle' => 'tooltip',
 																'title' => 'Cancelar interesse na disciplina',
-																'onclick' => 'allocateClazz(' . $teacher->id . ', ' . $clazz['Clazzes__id'] . ', ' . '\'deallocate\'' . ')',
+																'onclick' => 'allocateClazz(' . $teacher->id . ', ' . $clazz->id . ', ' . '\'deallocate\'' . ')',
 																)
 														) ?>
 														
@@ -208,14 +201,14 @@
 														<?php
 														if (!$has_clazz) {
 														?>
-															<?= $this->Form->button('<i id="icon-' . $clazz['Clazzes__id'] . '" class="fa fa-check"></i><i id="icon-loading-' . $clazz['Clazzes__id'] . '" class="fa fa-spinner fa-spin" style="display:none;"></i>'
+															<?= $this->Form->button('<i id="icon-' . $clazz->id . '" class="fa fa-check"></i><i id="icon-loading-' . $clazz->id . '" class="fa fa-spinner fa-spin" style="display:none;"></i>'
 															, array(
 																'type' => 'button',
-																'id' => 'button-' . $clazz['Clazzes__id'],
+																'id' => 'button-' . $clazz->id,
 																'class' => 'btn btn-sm btn-success',
 																'data-toggle' => 'tooltip',
 																'title' => 'Registrar interesse na disciplina',
-																'onclick' => 'allocateClazz(' . $teacher->id . ', ' . $clazz['Clazzes__id'] . ', ' . '\'allocate\'' . ')',
+																'onclick' => 'allocateClazz(' . $teacher->id . ', ' . $clazz->id . ', ' . '\'allocate\'' . ')',
 																)
 														) ?>
 															
@@ -321,56 +314,47 @@ $(document).ready(function() {
 					'</tr>');
 				}
 				
-				for (var i = 0; i < data.length; i++) {
-					
-					data[i].locals = $.map(data[i].locals, function(value, index) {
-						return [value];
-					});
-					
-					data[i].schedules = $.map(data[i].schedules, function(value, index) {
-						return [value];
-					});
-					
-					data[i].SchedulesLocals = $.map(data[i].SchedulesLocals, function(value, index) {
-						return [value];
-					});
-					
+				for (var i = 0; i < data.length; i++) {					
 					html += '<tr>' +
-						'<td>' + data[i].Clazzes__id + '</td>' +
-						'<td>' + data[i].Subjects__name + '</td>';
+						'<td>' + data[i].id + '</td>' +
+						'<td>' + data[i].subject.name + '</td>';
 					html+= '<td>';
-					for(var k = 0; k < data[i].SchedulesLocals.length; k++) {
-						html += daysOfWeek[data[i].SchedulesLocals[k].week_day] + '<br>'; 
+					for(var k = 0; k < data[i].scheduleLocals.length; k++) {
+						html += daysOfWeek[data[i].scheduleLocals[k].week_day] + '<br>'; 
 					}
 					html+= '</td>';
 					html+= '<td>';
-					for(var k = 0; k < data[i].schedules.length; k++) {
-						html += data[i].schedules[k].start_time + '<br>';
+					for(var k = 0; k < data[i].scheduleLocals.length; k++) {
+						var date = new Date(data[i].scheduleLocals[k].schedule.start_time);
+                        date.setTime(date.getTime() + date.getTimezoneOffset()*60*1000);
+						html += date.toLocaleTimeString('pt-BR') + '<br>';
 					}
 					html+= '</td>';
 					html+= '<td>';
-					for(var k = 0; k < data[i].schedules.length; k++) {
-						html += data[i].schedules[k].end_time + '<br>';
+					for(var k = 0; k < data[i].scheduleLocals.length; k++) {
+						var date = new Date(data[i].scheduleLocals[k].schedule.end_time);
+                        date.setTime(date.getTime() + date.getTimezoneOffset()*60*1000);
+                        html += date.toLocaleTimeString('pt-BR') + '<br>';
 					}
 					html+= '</td>';
 					html+= '<td>';
-					for(var k = 0; k < data[i].locals.length; k++) {
-						html += data[i].locals[k].name + ' - ' + data[i].locals[k].address + '<br>';
+					for(var k = 0; k < data[i].scheduleLocals.length; k++) {
+						html += data[i].scheduleLocals[k].local.name + ' - ' + data[i].scheduleLocals[k].local.address + '<br>';
 					}
 					html+= '</td>' +
-						'<td>' + data[i].Knowledges__name + '</td>' +
-						'<td>' + data[i].Courses__name + '</td>' +
-						'<td>' + data[i].Clazzes__name + '</td>';
+						'<td>' + data[i].subject.knowledge.name + '</td>' +
+						'<td>' + data[i].subject.course.name + '</td>' +
+						'<td>' + data[i].name + '</td>';
 					
 
 					var teacher_clazzes = <?php echo json_encode($teacher->clazzes); ?>;
 					var has_clazz = false;
 						
 					for (var j = 0; j < teacher_clazzes.length; j++) {
-						if (teacher_clazzes[j].id == data[i].Clazzes__id) {
+						if (teacher_clazzes[j].id == data[i].id) {
 			
-							html += '<td><a href="/clazzes/view/' + data[i].Clazzes__id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
-							'<button type="button" id="button-' + data[i].Clazzes__id + '" class="btn btn-sm btn-danger" data-toggle="tooltip" title="" onclick="allocateClazz(<?php echo $teacher->id; ?>, ' + data[i].Clazzes__id + ', \'deallocate\')" data-original-title="Cancelar interesse na disciplina"><i id="icon-' + data[i].Clazzes__id + '" class="fa fa-remove"></i><i id="icon-loading-' + data[i].Clazzes__id + '" class="fa fa-spinner fa-spin" style="display:none;"></i></button>' +
+							html += '<td><a href="/clazzes/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
+							'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-danger" data-toggle="tooltip" title="" onclick="allocateClazz(<?php echo $teacher->id; ?>, ' + data[i].id + ', \'deallocate\')" data-original-title="Cancelar interesse na disciplina"><i id="icon-' + data[i].id + '" class="fa fa-remove"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display:none;"></i></button>' +
 							'<div id="situation">Inscrito</div>';
 							
 							has_clazz = true;
@@ -380,8 +364,8 @@ $(document).ready(function() {
 			
 					if (!has_clazz) {
 	
-						html += '<td><a href="/clazzes/view/' + data[i].Clazzes__id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
-						'<button type="button" id="button-' + data[i].Clazzes__id + '" class="btn btn-sm btn-success" data-toggle="tooltip" title="Registrar interesse na disciplina" onclick="allocateClazz(<?php echo $teacher->id; ?>, ' + data[i].Clazzes__id + ', \'allocate\')" data-original-title="Registrar interesse na disciplina"><i id="icon-' + data[i].Clazzes__id + '" class="fa fa-check" style="display: inline-block;"></i><i id="icon-loading-' + data[i].Clazzes__id + '" class="fa fa-spinner fa-spin" style="display: none;"></i></button>' +
+						html += '<td><a href="/clazzes/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
+						'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-success" data-toggle="tooltip" title="Registrar interesse na disciplina" onclick="allocateClazz(<?php echo $teacher->id; ?>, ' + data[i].id + ', \'allocate\')" data-original-title="Registrar interesse na disciplina"><i id="icon-' + data[i].id + '" class="fa fa-check" style="display: inline-block;"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display: none;"></i></button>' +
 						'<div id="situation">Não Inscrito</div>';
 
 					}

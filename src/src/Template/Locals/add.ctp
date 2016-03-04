@@ -14,7 +14,7 @@
             </div>
             <div class="box-body">
                 <?php
-                    echo $this->Form->input('name', ['label' => 'Nome do local', 'placeholder' => 'Nome da local']);
+                    echo $this->Form->input('name', ['label' => 'Nome do local', 'placeholder' => 'Nome do local']);
                     echo $this->Form->input('address', ['label' => 'Localização', 'placeholder' => 'Localização']);
                     echo $this->Form->input('capacity', ['label' => 'Capacidade', 'placeholder' => 'Capacidade']);
                 ?>

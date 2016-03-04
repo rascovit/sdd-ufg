@@ -15,8 +15,8 @@
             <div class="box-body">
                 <?php
                 echo $this->Form->input('name', ['label' => 'Nome da disciplina', 'placeholder' => 'Nome da disciplina']);
-                echo $this->Form->input('theoretical_workload', ['label' => 'Carga horária teórica', 'placeholder' => 'Carga horária teórica']);
-                echo $this->Form->input('practical_workload', ['label' => 'Carga horária prática', 'placeholder' => 'Carga horária prática']);
+                echo $this->Form->input('theoretical_workload', ['label' => 'Carga horária teórica', 'placeholder' => 'Carga horária teórica', 'min' => 0]);
+                echo $this->Form->input('practical_workload', ['label' => 'Carga horária prática', 'placeholder' => 'Carga horária prática', 'min' => 0]);
                 echo $this->Form->input('course_id', ['label' => 'Curso', 'options' => $courses]);
                 echo $this->Form->input('knowledge_id', ['label' => 'Núcleo de conhecimento', 'options' => $knowledges]);
                 ?>

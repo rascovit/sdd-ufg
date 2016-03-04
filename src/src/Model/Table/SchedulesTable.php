@@ -58,6 +58,26 @@ class SchedulesTable extends Table
             ->requirePresence('end_time', 'create')
             ->notEmpty('end_time');
 
+        $validator
+            ->add('start_time', 'valid', ['rule' => function ($value, $context){
+                if ($context['data']['start_time'] >= $context['data']['end_time']){
+                    return false;
+                }
+                return true;
+            },
+            'message'=>' ',
+        ]);
+
+        $validator
+            ->add('end_time', 'valid', ['rule' => function ($value, $context){
+                if ($context['data']['start_time'] >= $context['data']['end_time']){
+                    return false;
+                }
+                return true;
+            },
+            'message'=>'O horário de término deve ser depois do horário de início.',
+        ]);
+
         return $validator;
     }
 
