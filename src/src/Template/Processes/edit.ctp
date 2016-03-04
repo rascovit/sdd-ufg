@@ -81,7 +81,7 @@
                                             <td>
                                                 <?php
                                                 echo $this->Form->input('prioridaade_criterio_1', ['label' => false, 'type' => 'number',
-                                                    'size' => 2, 'maxlenght' => 2, 'style' => 'width: 70px;']);
+                                                    'size' => 2, 'maxlenght' => 2, 'min' => 1, 'max' => 7, 'style' => 'width: 70px;']);
                                                 ?>
                                             </td>
                                             <td>Ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
@@ -96,7 +96,7 @@
                                             <td>
                                                 <?php
                                                 echo $this->Form->input('prioridaade_criterio_2', ['label' => false, 'type' => 'number',
-                                                    'size' => 2, 'maxlenght' => 2, 'style' => 'width: 70px;']);
+                                                    'size' => 2, 'maxlenght' => 2, 'min' => 1, 'max' => 7, 'style' => 'width: 70px;']);
                                                 ?>
                                             </td>
                                             <td>Ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
@@ -111,7 +111,67 @@
                                             <td>
                                                 <?php
                                                 echo $this->Form->input('prioridaade_criterio_3', ['label' => false, 'type' => 'number',
-                                                    'size' => 2, 'maxlenght' => 2, 'style' => 'width: 70px;']);
+                                                    'size' => 2, 'maxlenght' => 2, 'min' => 1, 'max' => 7, 'style' => 'width: 70px;']);
+                                                ?>
+                                            </td>
+                                            <td>Ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('ativa_criterio_4', ['label' => false, 'type' => 'checkbox',
+                                                    'style' => 'padding-left: 20px; margin-left: 20px;']);
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('prioridaade_criterio_4', ['label' => false, 'type' => 'number',
+                                                    'size' => 2, 'maxlenght' => 2, 'min' => 1, 'max' => 7, 'style' => 'width: 70px;']);
+                                                ?>
+                                            </td>
+                                            <td>Ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('ativa_criterio_5', ['label' => false, 'type' => 'checkbox',
+                                                    'style' => 'padding-left: 20px; margin-left: 20px;']);
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('prioridaade_criterio_5', ['label' => false, 'type' => 'number',
+                                                    'size' => 2, 'maxlenght' => 2, 'min' => 1, 'max' => 7, 'style' => 'width: 70px;']);
+                                                ?>
+                                            </td>
+                                            <td>Ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('ativa_criterio_6', ['label' => false, 'type' => 'checkbox',
+                                                    'style' => 'padding-left: 20px; margin-left: 20px;']);
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('prioridaade_criterio_6', ['label' => false, 'type' => 'number',
+                                                    'size' => 2, 'maxlenght' => 2, 'min' => 1, 'max' => 7, 'style' => 'width: 70px;']);
+                                                ?>
+                                            </td>
+                                            <td>Ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('ativa_criterio_7', ['label' => false, 'type' => 'checkbox',
+                                                    'style' => 'padding-left: 20px; margin-left: 20px;']);
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                echo $this->Form->input('prioridaade_criterio_7', ['label' => false, 'type' => 'number',
+                                                    'size' => 2, 'maxlenght' => 2, 'min' => 1, 'max' => 7, 'style' => 'width: 70px;']);
                                                 ?>
                                             </td>
                                             <td>Ipsum dolor sit amet salami venison chicken flank fatback doner.</td>

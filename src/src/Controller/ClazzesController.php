@@ -95,7 +95,7 @@ class ClazzesController extends AppController
 
         $this->Clazzes->ClazzesTeachers->Teachers->displayField('user.name');
         $this->set('teachers', $this->Clazzes->ClazzesTeachers->Teachers->find('list')->contain(['Users'])->toArray());
-        $this->set('schedules', $this->Clazzes->ClazzesSchedulesLocals->find('list')->contain(['Schedules', 'Locals'])->toArray());
+        $this->set('schedules', $this->Clazzes->ClazzesSchedulesLocals->find('list')->contain(['Schedules', 'Locals'])->group(['schedule_id', 'local_id'])->toArray());
 
         $this->set('clazzes', $this->paginate($clazzes));
         $this->set('_serialize', ['clazzes']);
@@ -555,14 +555,14 @@ class ClazzesController extends AppController
 						])->execute();
 					} else {
 						$query = $table_clazzes_teachers->query();
-						
+
 						$query->update()
 								->set(['status' => 'PENDING'])
 								->where([
 								'clazz_id' => $clazz_id,
 								'teacher_id' => $teacher_id
 						])->execute();
-						
+
 						$query->update()
 								->set(['status' => 'PENDING'])
 								->where([

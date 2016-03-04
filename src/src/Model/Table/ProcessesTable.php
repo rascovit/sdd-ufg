@@ -122,4 +122,27 @@ class ProcessesTable extends Table
 
         return $validator;
     }
+
+    /**
+     * Finds Processes by filters
+     *
+     * @param $filters
+     * @return Query
+     */
+    public function findByFilters($filters)
+    {
+        /** @var Query $processes */
+        $processes = $this->find('all');
+
+        $conditions = [];
+        if(isset($filters) && is_array($filters)) {
+            if(isset($filters['name']) && !empty(trim($filters['name']))) {
+                $conditions['Processes.name LIKE'] = "%" . $filters['name'] . "%";
+            }
+        }
+
+        $processes->where($conditions);
+
+        return $processes;
+    }
 }

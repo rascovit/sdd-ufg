@@ -11,7 +11,6 @@
         <div class="box box-primary">
             <div class="box-body box-profile">
                 <div class="profile-images-multiple">
-                    <?php if(!empty($clazz->selectedTeachers)): ?>
                         <?php
                             echo $this->Html->link(
                                 $this->Gravatar->generate(
@@ -26,11 +25,6 @@
                                 ['escape' => false]
                             );
                         ?>
-                    <?php else: ?>
-                        <?= $this->Html->image('no-chosen-clazz.png', [
-                            'class' => 'profile-user-img img-responsive img-circle'
-                        ]) ?>
-                    <?php endif; ?>
                 </div>
 
                 <div class="profile-username-box">
@@ -204,7 +198,7 @@
                                 <td>
                                     <?= $this->Html->link(
                                         '',
-                                        ['action' => 'view', $role->id],
+                                        ['controller' => 'roles', 'action' => 'view', $role->id],
                                         [
                                             'title' => __('Visualizar'),
                                             'class' => 'btn btn-sm btn-default glyphicon glyphicon-search',
@@ -253,7 +247,7 @@
                                 <td>
                                     <?= $this->Html->link(
                                         '',
-                                        ['action' => 'view', $knowledgeTeacher->knowledge->id],
+                                        ['controller' => 'knowledges', 'action' => 'view', $knowledgeTeacher->knowledge->id],
                                         [
                                             'title' => __('Visualizar'),
                                             'class' => 'btn btn-sm btn-default glyphicon glyphicon-search',
@@ -299,7 +293,7 @@
                                     <td>
                                         <?= $this->Html->link(
                                             '',
-                                            ['action' => 'view', $clazze->id],
+                                            ['controller' => 'clazzes', 'action' => 'view', $clazze->id],
                                             [
                                                 'title' => __('Visualizar'),
                                                 'class' => 'btn btn-sm btn-default glyphicon glyphicon-search',

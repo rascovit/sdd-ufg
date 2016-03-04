@@ -7,22 +7,44 @@
 <div class="row">
     <div class="col-xs-12">
         <div class="box box-primary">
+            <?= $this->Form->create(null, ['type' => 'get']) ?>
             <div class="box-header">
                 <h3 class="box-title">Lista de docentes</h3>
-                <div class="pull-right box-tools">
-                    <?= $this->Html->link(
-                        '<i class="fa fa-plus-circle"></i> ' . __('Adicionar'),
-                        ['action' => 'add'],
-                        [
-                            'escape' => false,
-                            'data-toggle' => 'tooltip',
-                            'data-original-title' => __('Adicionar'),
-                            'class' => 'btn btn-sm btn-primary'
-                        ]
-                    );
-                    ?>
+                <div class="box-tools">
+                    <div class="input-group" style="width: 270px">
+                        <?= $this->Html->link(
+                            '<i class="fa fa-plus-circle"></i> ' . __('Adicionar'),
+                            ['action' => 'add'],
+                            [
+                                'escape' => false,
+                                'data-toggle' => 'tooltip',
+                                'data-original-title' => __('Adicionar'),
+                                'class' => 'btn btn-sm btn-primary'
+                            ]
+                        );
+                        ?>
+
+                        <?= $this->Form->input('name', [
+                            'label' => false,
+                            'class' => 'form-control input-sm pull-right',
+                            'style' => 'width: 150px',
+                            'placeholder' => __('Buscar por nome'),
+                            'templates' => [
+                                'inputContainer' => '{{content}}'
+                            ]
+                        ]) ?>
+
+                        <div class="input-group-btn">
+                            <?= $this->Form->button('<i class="fa fa-search"></i>', [
+                                'class' => 'btn btn-sm btn-default',
+                                'escape' => false
+                            ]) ?>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <?= $this->Form->end() ?>
+
             <div class="box-body table-responsive no-padding">
                 <table class="table table-striped table-valign-middle">
                     <thead>
