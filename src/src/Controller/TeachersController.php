@@ -317,7 +317,8 @@ class TeachersController extends AppController
 					$query = $table_clazzes_teachers->query();
 					$query->delete()->where([
 							'clazz_id' => $clazz_id,
-							'teacher_id' => $id
+							'teacher_id' => $id,
+							'status != ' => 'SELECTED'
 					])->execute();
 
 					if ($query) {
@@ -368,7 +369,7 @@ class TeachersController extends AppController
             ->contain([
                 'Subjects.Courses', 'Subjects.Knowledges',
                 'ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules',
-                'Processes'
+                'Processes', 'ClazzesTeachers'
 			])
 			->innerJoinWith('Processes', function ($q) use ($params) {
 				return $q->where(['Processes.status' => 'OPENED']);
@@ -390,7 +391,7 @@ class TeachersController extends AppController
 					'Processes' => function ($q) use ($params) {
 						return $q->where(['Processes.id LIKE ' => '%' . $params['process'] . '%']);
 					},
-					'ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules'
+					'ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules', 'ClazzesTeachers'
 				])
 				->innerJoinWith('ClazzesSchedulesLocals.Locals', function ($q) use ($params) {
 						return $q->where(['Locals.name LIKE ' => '%' . $params['local'] . '%'])

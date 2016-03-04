@@ -245,11 +245,11 @@ $(document).ready(function() {
 						'<td colspan="10" class="text-center">Não existem docentes cadastrados com os critérios informados</td>' +
 					'</tr>');
 				}
-
+				var recomended = <?php echo $recomendedTeacher; ?>;
 				for (var i = 0; i < data.length; i++) {
-					html += '<tr id="' + data[i].id + '">' +
+					html += '<tr style="' + (data[i].id == recomended  ? 'background-color:lightblue;' : '') + '" id="' + data[i].id + '">' +
 						'<td>' + data[i].id + '</td>' +
-						'<td>' + data[i].user.name + '</td>' +
+						'<td>' + (data[i].id == recomended  ? data[i].user.name + ' (Recomendado)' : data[i].user.name) + '</td>' +
 						'<td>' + data[i].registry + '</td>' +
 						'<td>' + data[i].workload + '</td>' +
 						'<td>' + (data[i].formation == null ? '' : data[i].formation) + '</td>' +
@@ -260,11 +260,10 @@ $(document).ready(function() {
 						html += data[i].knowledges[k].name + '<br>';
 					}
 
-					var teacher_clazzes = <?php echo json_encode($clazzesTeachers); ?>;
 					var has_clazz = false;
 
-					for (var j = 0; j < teacher_clazzes.length; j++) {
-						if (teacher_clazzes[j].teacher_id == data[i].id && teacher_clazzes[j].status == 'SELECTED') {
+					for (var j = 0; j < data[i].clazzes.length; j++) {
+						if (data[i].clazzes[j].id == <?php echo $clazz->id; ?> && data[i].clazzes[j]._joinData.status == 'SELECTED') {
 
 							html += '<td><a href="/teachers/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
 							'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-danger" data-toggle="tooltip" title="" onclick="allocateTeacher(<?php echo $clazz->id; ?>, ' + data[i].id + ', \'deallocate\')" data-original-title="Cancelar inscricao do docente para ministrar Turma"><i id="icon-' + data[i].id + '" class="fa fa-remove"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display:none;"></i></button>' +
@@ -278,7 +277,7 @@ $(document).ready(function() {
 					if (!has_clazz) {
 
 						html += '<td><a href="/clazzes/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
-						'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-success" data-toggle="tooltip" title="Alocar docente para ministrar Turma" onclick="allocateTeacher(<?php echo $clazz->id; ?>, ' + data[i].id + ', \'allocate\')" data-original-title="Alocar docente para ministrar a Turma"><i id="icon-' + data[i].id + '" class="fa fa-check" style="display: inline-block;"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display: none;"></i></button>' +
+						'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-success" data-toggle="tooltip" title="Alocar docente para ministrar Turma" onclick="allocateTeacher(<?php echo $clazz->id; ?>, ' + data[i].id + ', \'allocate\')" data-original-title="Alocar docente para ministrar a Turma"><i id="icon-' + data[i].id + '" class="fa fa-check"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display: none;"></i></button>' +
 						'<div id="situation-' + data[i].id + '"></div>';
 
 					}
@@ -346,8 +345,8 @@ function allocateTeacher(clazz, teacher, allocate) {
 			{
 				$('#message').toggle();
 			}
-			$('#icon-loading-' + teacher).toggle();
-			$('#icon-' + teacher).toggle();
+			$('#icon-loading-' + teacher).hide();
+			$('#icon-' + teacher).show();
 
 		},
 		error: function (tab) {

@@ -490,7 +490,7 @@ class ClazzesController extends AppController
 
 		$teachers = $this->getTeachers();
 
-		$recomendedTeacher = null;
+		$recomendedTeacher = 0;
 		$maior = 0;
 		foreach ($clazzesTeachers->all() as $c) {
 			if ($maior < $c->priority) {
@@ -538,7 +538,7 @@ class ClazzesController extends AppController
 					die();
 				} else if ($teacher_id != null && $clazz_id != null && $allocate == 'deallocate') {
 
-					if (count($clazz->selectedTeachersIds) >= 1) {
+					if (count($clazz->selectedTeachersIds) > 1) {
 						$query = $table_clazzes_teachers->query();
 						$query->update()
 								->set(['status' => 'REJECTED'])
@@ -555,6 +555,14 @@ class ClazzesController extends AppController
 						])->execute();
 					} else {
 						$query = $table_clazzes_teachers->query();
+						
+						$query->update()
+								->set(['status' => 'PENDING'])
+								->where([
+								'clazz_id' => $clazz_id,
+								'teacher_id' => $teacher_id
+						])->execute();
+						
 						$query->update()
 								->set(['status' => 'PENDING'])
 								->where([
