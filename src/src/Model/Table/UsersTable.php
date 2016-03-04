@@ -89,4 +89,42 @@ class UsersTable extends Table
         $rules->add($rules->isUnique(['email']));
         return $rules;
     }
+
+    /**
+     * Finds users by filters
+     *
+     * @param $filters
+     * @return Query
+     */
+    public function findByFilters($filters)
+    {
+        /** @var Query $users */
+        $users = $this->find('all');
+
+        $conditions = [];
+        if(isset($filters) && is_array($filters)) {
+            if(isset($filters['login']) && !empty(trim($filters['login']))) {
+                $conditions['Users.login LIKE'] = "%" . $filters['login'] . "%";
+            }
+
+            if(isset($filters['email']) && !empty(trim($filters['email']))) {
+                $conditions['Users.email LIKE'] = "%" . $filters['email'] . "%";
+            }
+
+            if(isset($filters['name']) && !empty(trim($filters['name']))) {
+                $conditions['Users.name LIKE'] = "%" . $filters['name'] . "%";
+            }
+
+            if(isset($filters['is_admin']) && $filters['is_admin'] == true) {
+                $conditions['AND']['Users.is_admin'] = 1;
+            }
+        }
+
+        $users->where($conditions);
+
+        return [
+            'data' => $users,
+            'isFiltered' => !empty($conditions)
+        ];
+    }
 }

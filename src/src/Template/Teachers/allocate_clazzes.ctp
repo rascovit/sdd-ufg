@@ -179,9 +179,8 @@
                                                 ]
                                             ) ?>
 											<?php 	$has_clazz = false;
-													foreach ($teacher->clazzes as $c) : 
-														if ($clazz->id == $c->id) { ?>
-											
+													foreach ($clazz->intents as $c) : 
+														if ($c->teacher_id == $teacher->id && $c->status == 'PENDING') { ?>
 														<?= $this->Form->button('<i id="icon-' . $clazz->id . '" class="fa fa-remove"></i><i id="icon-loading-' . $clazz->id . '" class="fa fa-spinner fa-spin" style="display:none;"></i>'
 															, array(
 																'type' => 'button',
@@ -192,7 +191,20 @@
 																'onclick' => 'allocateClazz(' . $teacher->id . ', ' . $clazz->id . ', ' . '\'deallocate\'' . ')',
 																)
 														) ?>
-														
+														<div id="situation">
+															Inscrito
+														</div>
+														<?php 
+																$has_clazz = true;
+																break; 
+																
+															} else if ($c->teacher_id == $teacher->id && $c->status == 'REJECTED') { ?>
+																Rejeitado
+														<?php 
+																$has_clazz = true;
+																break;
+															} else if ($c->teacher_id == $teacher->id && $c->status == 'SELECTED') { ?>
+																Selecionado
 														<?php 
 																$has_clazz = true;
 																break;
@@ -211,19 +223,13 @@
 																'onclick' => 'allocateClazz(' . $teacher->id . ', ' . $clazz->id . ', ' . '\'allocate\'' . ')',
 																)
 														) ?>
-															
+															<div id="situation">
+															Não Inscrito
+														</div>
 														<?php
 														}
 											?>
-											<div id="situation">
-												<?php
-													if ($has_clazz) {
-														echo 'Inscrito';
-													} else {
-														echo 'Não Inscrito';
-													}
-												?>
-											</div>
+											
 										</td>
 									</tr>
 								<?php endforeach; ?>
@@ -346,12 +352,10 @@ $(document).ready(function() {
 						'<td>' + data[i].subject.course.name + '</td>' +
 						'<td>' + data[i].name + '</td>';
 					
-
-					var teacher_clazzes = <?php echo json_encode($teacher->clazzes); ?>;
 					var has_clazz = false;
 						
-					for (var j = 0; j < teacher_clazzes.length; j++) {
-						if (teacher_clazzes[j].id == data[i].id) {
+					for (var j = 0; j < data[i].intents.length; j++) {
+						if (data[i].intents[j].teacher_id == <?php echo $teacher->id; ?> && data[i].intents[j].status == 'PENDING') {
 			
 							html += '<td><a href="/clazzes/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
 							'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-danger" data-toggle="tooltip" title="" onclick="allocateClazz(<?php echo $teacher->id; ?>, ' + data[i].id + ', \'deallocate\')" data-original-title="Cancelar interesse na disciplina"><i id="icon-' + data[i].id + '" class="fa fa-remove"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display:none;"></i></button>' +
@@ -359,13 +363,23 @@ $(document).ready(function() {
 							
 							has_clazz = true;
 							break;
-						} 
+						} else if (data[i].intents[j].teacher_id == <?php echo $teacher->id; ?> && data[i].intents[j].status == 'REJECTED') {
+							html += '<td><a href="/clazzes/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>Rejeitado';
+							
+							has_clazz = true;
+							break;
+						} else if (data[i].intents[j].teacher_id == <?php echo $teacher->id; ?> && data[i].intents[j].status == 'SELECTED') {
+							html += '<td><a href="/clazzes/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>Selecionado';
+							
+							has_clazz = true;
+							break;
+						}
 					}
 			
 					if (!has_clazz) {
 	
 						html += '<td><a href="/clazzes/view/' + data[i].id + '" title="" class="btn btn-sm btn-default glyphicon glyphicon-search" data-toggle="tooltip" data-original-title="Visualizar"></a>' +
-						'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-success" data-toggle="tooltip" title="Registrar interesse na disciplina" onclick="allocateClazz(<?php echo $teacher->id; ?>, ' + data[i].id + ', \'allocate\')" data-original-title="Registrar interesse na disciplina"><i id="icon-' + data[i].id + '" class="fa fa-check" style="display: inline-block;"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display: none;"></i></button>' +
+						'<button type="button" id="button-' + data[i].id + '" class="btn btn-sm btn-success" data-toggle="tooltip" title="Registrar interesse na disciplina" onclick="allocateClazz(<?php echo $teacher->id; ?>, ' + data[i].id + ', \'allocate\')" data-original-title="Registrar interesse na disciplina"><i id="icon-' + data[i].id + '" class="fa fa-check"></i><i id="icon-loading-' + data[i].id + '" class="fa fa-spinner fa-spin" style="display: none;"></i></button>' +
 						'<div id="situation">Não Inscrito</div>';
 
 					}
@@ -430,8 +444,8 @@ function allocateClazz(teacher, clazz, allocate) {
 			{
 				$('#message').toggle();
 			}
-			$('#icon-loading-' + clazz).toggle();
-			$('#icon-' + clazz).toggle();
+			$('#icon-loading-' + clazz).hide();
+			$('#icon-' + clazz).show();
 	
 		},
 		error: function (tab) {
