@@ -49,36 +49,32 @@ class CreateProcesses extends AbstractMigration
             ])
             ->create();
 
-        $table = $this->table('processes_process_configurations', ['id' => false, 'primary_key' => ['process_id', 'process_configuration_id']]);
+        $table = $this->table('process_configurations');
         $table
             ->addColumn('process_id', 'integer', [
                 'default' => null,
                 'limit' => 11,
                 'null' => false,
             ])
-            ->addColumn('process_configuration_id', 'integer', [
-                'default' => null,
-                'limit' => 11,
+            ->addColumn('type', 'string', [
+                'default' => 'ALLOCATED_QUANTITY',
+                'limit' => 50,
+                'null' => false,
+            ])
+            ->addColumn('priority', 'integer', [
+                'default' => 1,
+                'limit' => 3,
                 'null' => false,
             ])
             ->addIndex(
                 [
-                    'process_configuration_id', 'process_id'
+                    'process_id'
                 ]
             )
             ->create();
 
         /** Associations */
-        $this->table('processes_process_configurations')
-            ->addForeignKey(
-                'process_configuration_id',
-                'process_configurations',
-                'id',
-                [
-                    'update' => 'CASCADE',
-                    'delete' => 'CASCADE'
-                ]
-            )
+        $this->table('process_configurations')
             ->addForeignKey(
                 'process_id',
                 'processes',
@@ -93,15 +89,12 @@ class CreateProcesses extends AbstractMigration
 
     public function down()
     {
-        $this->table('processes_process_configurations')
-            ->dropForeignKey(
-                'process_configuration_id'
-            )
+        $this->table('process_configurations')
             ->dropForeignKey(
                 'process_id'
             );
 
         $this->dropTable('processes');
-        $this->dropTable('processes_process_configurations');
+        $this->dropTable('process_configurations');
     }
 }
