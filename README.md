@@ -28,3 +28,12 @@ OU
 Isto irá iniciar o servidor web em http://localhost:8765/. Caso você deseje muder a porta ou o host do servidor basta utilizar os parâmetros -H e -p:
 
 Ex: `./bin/cake server -H 192.168.13.37 -p 5673`
+
+# [Ambiente de testes](http://45.55.63.226/users/login)
+
+Servidor: [http://45.55.63.226/](http://45.55.63.226/users/login)
+
+Usuário administrador: admin
+
+Senha administrador: senha123
+

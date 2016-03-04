@@ -5,6 +5,25 @@
     <li class="active">Simulação</li>
 <?php $this->end(); ?>
 
+<!--<h1>Candidate teachers:</h1>
+<?= debug($candidateTeachers); ?>
+<h1>Selected teacherId:</h1>
+<?= debug($selectedTeacherId); ?>
+<h1>Priority:</h1>
+<?= debug($priority); ?>
+<h1>Workload:</h1>
+<?= debug($workload); ?>
+<h1>Level:</h1>
+<?= debug($level); ?>
+<h1>Oldest entry date:</h1>
+<?= debug($oldestEntryDate); ?>
+<h1>Recovered Clazzes:</h1>
+<?= debug($recoveredClazzes); ?>
+<h1>Teachers Current Workload:</h1>
+<?= debug($teachersCurrentWorkload); ?>
+<h1>Distributed clazzes:</h1>
+<?= debug($distributedClazzes); ?>-->
+
 <!-- FIRST TABLE -->
 <div class="row">
     <div class="col-xs-12">
@@ -12,51 +31,7 @@
             <div class="box-header">
                 <h3 class="box-title">Alocados manualmente [não sofreram distribuição automática]</h3>
             </div>
-            <div class="box-body table-responsive no-padding">
-                <table class="table table-striped table-valign-middle">
-                    <thead>
-                        <tr>
-                            <th><?= $this->Paginator->sort('codDisciplina', __('#CodDisciplina')) ?></th>
-                            <th><?= $this->Paginator->sort('disciplina', __('Disciplina')) ?></th>
-                            <th><?= $this->Paginator->sort('matricula', __('Matrícula')) ?></th>
-                            <th><?= $this->Paginator->sort('docente', __('Docente')) ?></th>
-							<th><?= $this->Paginator->sort('local', __('Local')) ?></th>
-							<th><?= $this->Paginator->sort('codHorario', __('#CodHorario')) ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($clazzes as $clazz): ?>
-                            <tr>
-                            	<?php foreach($clazz->intents as $intent): ?>
-                            		<?php if($intent->status == 'APPROVED'): ?>
-		                                <td><?= $this->Number->format($clazz->subject->id) ?></td>
-		                                <td><?= h($clazz->subject->name) ?></td>
-		                                <td><?= $intent->teacher->registry ?></td>
-										<td><?= $intent->teacher->user->name ?></td>
-										<td>
-											<?php foreach($clazz->locals as $local): ?>
-		                                		<?php echo ($local->name .' ['. $local->address .']') ?><br>
-		                                	<?php endforeach; ?>
-										</td>
-										<td>
-											<?php foreach($clazz->locals as $local): ?>
-		                                		<?php echo ($local->_joinData->schedule_id) ?><br>
-		                                	<?php endforeach; ?>
-										</td>
-									<?php endif; ?>
-	                            <?php endforeach; ?>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="box-footer clearfix">
-                <ul class="pagination pagination-sm no-margin pull-right">
-                    <?= $this->Paginator->prev('«') ?>
-                    <?= $this->Paginator->numbers() ?>
-                    <?= $this->Paginator->next('»') ?>
-                </ul>
-            </div>
+            <?php echo $this->element('allocated-and-non-conflicting-clazzes') ?>
         </div>
     </div>
 </div>
@@ -78,31 +53,21 @@
                             <th><?= $this->Paginator->sort('docente', __('Docente')) ?></th>
 							<th><?= $this->Paginator->sort('local', __('Local')) ?></th>
 							<th><?= $this->Paginator->sort('codHorario', __('#CodHorario')) ?></th>
+							<th><?= $this->Paginator->sort('status', __('Status')) ?></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($clazzes as $clazz): ?>
-                            <tr>
-                            	<?php foreach($clazz->intents as $intent): ?>
-                            		<?php if($intent->status == 'AUTOMATIC DISTRIBUTION - PENDING'): ?>
-		                                <td><?= $this->Number->format($clazz->subject->id) ?></td>
-		                                <td><?= h($clazz->subject->name) ?></td>
-		                                <td><?= $intent->teacher->registry ?></td>
-										<td><?= $intent->teacher->user->name ?></td>
-										<td>
-											<?php foreach($clazz->locals as $local): ?>
-		                                		<?php echo ($local->name .' ['. $local->address .']') ?><br>
-		                                	<?php endforeach; ?>
-										</td>
-										<td>
-											<?php foreach($clazz->locals as $local): ?>
-		                                		<?php echo ($local->_joinData->schedule_id) ?><br>
-		                                	<?php endforeach; ?>
-										</td>
-									<?php endif; ?>
-	                            <?php endforeach; ?>
-                            </tr>
-                        <?php endforeach; ?>
+                    <?php foreach ($distributedClazzes as $clazzId => $clazzInfo): ?>
+                        <tr>
+                            <td><?= $this->Number->format($clazzInfo['clazzeId']) ?></td>
+                            <td><?= h($clazzInfo['subjectName']) ?></td>
+                            <td><?= h($clazzInfo['teacherRegistry']) ?></td>
+                            <td><?= h($clazzInfo['userName']) ?></td>
+                            <td><?= h($clazzInfo['locals']) ?></td>
+                            <td><?= h($clazzInfo['schedules']) ?></td>
+                            <td><?= h($clazzInfo['status']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
@@ -122,7 +87,7 @@
 	<div class="col-xs-12 text-center">
 		<?= $this->Html->link(
             '<i class="fa fa-times-circle"></i> ' . __('Cancelar'),
-            '#',
+            ['action' => 'effectivateRevert', $processId],
             [
                 'escape' => false,
                 'class' => 'btn btn-sm btn-danger'
@@ -131,7 +96,7 @@
         ?>
 		<?= $this->Html->link(
             '<i class="fa  fa-check-circle"></i> ' . __('Efetivar Distribuição Automática'),
-            '#',
+            ['action' => 'effectivateDistribution'],
             [
                 'escape' => false,
                 'class' => 'btn btn-sm btn-success'

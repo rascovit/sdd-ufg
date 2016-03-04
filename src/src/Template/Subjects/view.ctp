@@ -9,7 +9,7 @@
     <div class="col-xs-12">
         <div class="box box-primary">
             <div class="box-header">
-                <h3 class="box-title">Informações da disciplina</h3>
+                <h3 class="box-title"><?= __('Informações da disciplina') ?></h3>
                 <div class="pull-right box-tools">
                     <?= $this->Html->link(
                         __('Editar'),
@@ -59,7 +59,7 @@
     <div class="col-xs-12">
         <div class="box box-primary">
             <div class="box-header">
-                <h3 class="box-title">Turmas da disciplina</h3>
+                <h3 class="box-title"><?= __('Turmas da disciplina') ?></h3>
             </div>
             <div class="box-body table-responsive no-padding">
                 <table class="table table-striped table-valign-middle">
@@ -75,7 +75,7 @@
                     <tbody>
                     <?php if(count($subject->clazzes) < 1): ?>
                         <tr>
-                            <td colspan="6" class="text-center">Essa disciplina não possui nenhuma turma associada</td>
+                            <td colspan="5" class="text-center"><?= __('Essa disciplina não possui nenhuma turma associada') ?></td>
                         </tr>
                     <?php endif; ?>
                     <?php foreach ($subject->clazzes as $clazz): ?>
@@ -98,6 +98,61 @@
                             </td>
                         </tr>
                     <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title"><?= __('Docentes que já ministraram a disciplina') ?></h3>
+            </div>
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-striped table-valign-middle">
+                    <thead>
+                    <tr>
+                        <th><?= __('#ID') ?></th>
+                        <th><?= __('Nome') ?></th>
+                        <th><?= __('Matrícula') ?></th>
+                        <th><?= __('Formação') ?></th>
+                        <th><?= __('Carga horária') ?></th>
+                        <th><?= __('Currículo Lattes') ?></th>
+                        <th width="200px"><?= __('Ações') ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if($experiencedTeachers->count() < 1): ?>
+                        <tr>
+                            <td colspan="7" class="text-center"><?= __('Nenhum docente ministrou essa disciplina anteriormente') ?></td>
+                        </tr>
+                    <?php else: ?>
+                    <?php foreach ($experiencedTeachers as $teacher): ?>
+                        <tr>
+                            <td><?= h($teacher->teacher->id) ?></td>
+                            <td><?= h($teacher->teacher->user->name) ?></td>
+                            <td><?= h($teacher->teacher->registry) ?></td>
+                            <td><?= h($teacher->teacher->formation) ?></td>
+                            <td><?= h($teacher->teacher->workload) ?></td>
+                            <td><?= h($teacher->teacher->url_lattes) ?></td>
+                            <td>
+                                <?= $this->Html->link(
+                                    '',
+                                    ['controller' => 'Teachers', 'action' => 'view', $teacher->teacher->id],
+                                    [
+                                        'title' => __('Visualizar'),
+                                        'class' => 'btn btn-sm btn-default glyphicon glyphicon-search',
+                                        'data-toggle' => 'tooltip',
+                                        'data-original-title' => __('Visualizar'),
+                                    ]
+                                ) ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
                     </tbody>
                 </table>
             </div>

@@ -130,7 +130,10 @@
                                             <?php if(count($clazz->selectedTeachers) > 0 && in_array($loggedUser->teacher->id, $clazz->selectedTeachersIds)): ?>
                                                 <li>
                                                     <?= $this->Html->link(
-                                                        '<i class="glyphicon glyphicon-folder-open"></i> Finalizar turma',
+                                                        '<i class="glyphicon '. ((count($clazz->files) == 3) ? "glyphicon-folder-close" : "glyphicon-folder-open") .'"></i> ' .
+                                                        ((count($clazz->files) == 3) ? __('Finalizar Turma (Já existem arquivos enviados)') :
+                                                            ((count($clazz->files) > 0 && count($clazz->files) < 3) ? __('Finalizar Turma (Arquivos incompletos)')
+                                                                : __('Finalizar Turma'))),
                                                         ['action' => 'finishClazze', $clazz->id],
                                                         ['escape' => false]
                                                     ) ?>
@@ -140,14 +143,14 @@
                                             <?php if($loggedUser !== false && $loggedUser->canAdmin()): ?>
                                                 <li>
                                                     <?= $this->Html->link(
-                                                        '<i class="glyphicon glyphicon-pencil"></i> Editar',
+                                                        '<i class="glyphicon glyphicon-pencil"></i> ' . __('Editar'),
                                                         ['action' => 'edit', $clazz->id],
                                                         ['escape' => false]
                                                     ) ?>
                                                 </li>
                                                 <li>
                                                     <?= $this->Form->postLink(
-                                                        '<i class="glyphicon glyphicon-trash"></i> Remover',
+                                                        '<i class="glyphicon glyphicon-trash"></i> ' . __('Remover'),
                                                         ['action' => 'delete', $clazz->id],
                                                         [
                                                             'escape' => false,
@@ -160,7 +163,7 @@
                                             <?php if($loggedUser !== false && ($loggedUser->canAdmin() || $loggedUser->isFacilitatorOf($clazz->subject->knowledge_id))): ?>
                                                 <li>
                                                     <?= $this->Html->link(
-                                                        '<i class="glyphicon glyphicon-education"></i> Alocar docente',
+                                                        '<i class="glyphicon glyphicon-education"></i> ' . __('Alocar docente'),
                                                         ['controller' => 'Clazzes', 'action' => 'allocateTeacher', $clazz->id],
                                                         ['escape' => false]
                                                     ) ?>

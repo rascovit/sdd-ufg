@@ -18,7 +18,17 @@ class KnowledgesController extends AppController
      */
     public function index()
     {
-        $this->set('knowledges', $this->paginate($this->Knowledges));
+        $this->paginate = [
+            'limit' => 25,
+            'order' => [
+                'Knowledges.id' => 'ASC'
+            ]
+        ];
+
+        $this->request->data = $this->request->query;
+        $knowledges = $this->Knowledges->findByFilters($this->request->query);
+
+        $this->set('knowledges', $this->paginate($knowledges));
         $this->set('_serialize', ['knowledges']);
     }
 

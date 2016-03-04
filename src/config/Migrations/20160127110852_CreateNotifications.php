@@ -16,9 +16,14 @@ class CreateNotifications extends AbstractMigration
                 'default' => null,
                 'null' => false,
             ])
-            ->addColumn('read', 'boolean', [
+            ->addColumn('is_read', 'boolean', [
                 'default' => false,
                 'null' => false,
+            ])
+            ->addColumn('link', 'string', [
+                'default' => '/',
+                'null' => false,
+                'limit' => 255
             ])
             ->addColumn('user_id', 'integer', [
                 'default' => null,

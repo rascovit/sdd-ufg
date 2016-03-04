@@ -59,6 +59,18 @@ class CreateTeachers extends AbstractMigration
                 'default' => null,
                 'null' => true,
             ])
+            ->addColumn('probation', 'string', [
+                'default' => null,
+                'null' => true,
+            ])
+            ->addColumn('nde_member', 'boolean', [
+                'default' => false,
+                'null' => false,
+            ])
+            ->addColumn('exclusive_dedication', 'boolean', [
+                'default' => true,
+                'null' => false,
+            ])
             ->addIndex(['user_id'])
             ->create();
 

@@ -30,7 +30,6 @@
                                 echo $this->Form->input('workload', ['label' => 'Carga Horária', 'placeholder' => 'Carga Horária']);
                                 echo $this->Form->input('about', ['label' => 'Sobre', 'placeholder' => 'Sobre']);
                                 echo $this->Form->input('situation', ['label' => 'Situação', 'placeholder' => 'Situação']);
-                                echo $this->Form->input('knowledges._ids', ['label' => 'Núcleos de conhecimento', 'type' => 'select', 'multiple' => true, 'options' => $knowledges]);
                             ?>
                         </fieldset>
                     </div>
@@ -49,8 +48,7 @@
                                     ['value' => '1', 'text' => 'Sim'],
                                     ['value' => '0', 'text' => 'Não'],
 
-                                ], ['hiddenField' => false, 'label' => 'É Administrador', 
-									'disabled' => (($loggedUser !== false && $loggedUser->canAdmin()) ? false : true)]);
+                                ], ['hiddenField' => false, 'label' => 'É Administrador', 'disabled' => true]);
                             ?>
                             </label>
                         </fieldset>

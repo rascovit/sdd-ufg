@@ -58,6 +58,10 @@ class ProcessesTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
+            ->requirePresence('name', 'create')
+            ->notEmpty('name');
+
+        $validator
             ->add('initial_date', 'valid', ['rule' => ['date', 'dmy']])
             ->requirePresence('initial_date', 'create')
             ->notEmpty('initial_date');
@@ -66,6 +70,16 @@ class ProcessesTable extends Table
             ->add('teacher_intent_date', 'valid', ['rule' => ['date', 'dmy']])
             ->requirePresence('teacher_intent_date', 'create')
             ->notEmpty('teacher_intent_date');
+
+        $validator
+            ->add('teacher_intent_date', 'valid', ['rule' => function ($value, $context){
+                if ($context['data']['initial_date'] >= $context['data']['teacher_intent_date']){
+                    return false;
+                }
+                return true;
+            },
+                'message'=>'A data de término deve ser depois do data de início.',
+            ]);
 
         $validator
             ->add('primary_distribution_date', 'valid', ['rule' => ['date', 'dmy']])
@@ -78,6 +92,16 @@ class ProcessesTable extends Table
             ->notEmpty('substitute_intent_date');
 
         $validator
+            ->add('substitute_intent_date', 'valid', ['rule' => function ($value, $context){
+                if ($context['data']['primary_distribution_date'] >= $context['data']['substitute_intent_date']){
+                    return false;
+                }
+                return true;
+            },
+                'message'=>'A data de término deve ser depois do data de início.',
+            ]);
+
+        $validator
             ->add('secondary_distribution_date', 'valid', ['rule' => ['date', 'dmy']])
             ->requirePresence('secondary_distribution_date', 'create')
             ->notEmpty('secondary_distribution_date');
@@ -86,6 +110,16 @@ class ProcessesTable extends Table
             ->add('final_date', 'valid', ['rule' => ['date', 'dmy']])
             ->requirePresence('final_date', 'create')
             ->notEmpty('final_date');
+
+        $validator
+            ->add('final_date', 'valid', ['rule' => function ($value, $context){
+                if ($context['data']['secondary_distribution_date'] >= $context['data']['final_date']){
+                    return false;
+                }
+                return true;
+            },
+                'message'=>'A data de término deve ser depois do data de início.',
+            ]);
 
         $validator
             ->add('status', 'enum', ['rule' => ['inList', ['OPENED', 'CLOSED'], true]])

@@ -9,8 +9,9 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property string $type
  * @property string $description
- * @property bool $read
+ * @property bool $is_read
  * @property int $user_id
+ * @property string $link
  * @property \App\Model\Entity\User $user
  */
 class Notification extends Entity

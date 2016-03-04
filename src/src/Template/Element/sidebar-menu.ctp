@@ -10,6 +10,7 @@
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Processos em aberto'), ['controller' => 'processes', 'action' => 'index'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Turmas em aberto'), ['controller' => 'clazzes', 'action' => 'index', '?' => ['status' => 'OPENED']], ['escape' => false]) ?></li>
 				<li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Minhas inscrições'), ['controller' => 'clazzes', 'action' => 'index', '?' => ['teachers' => [$loggedUser->teacher->id]]], ['escape' => false]) ?></li>
+				<li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Professores sub alocados'), ['controller' => 'teachers', 'action' => 'getSubAllocatedTeachers'], ['escape' => false]) ?></li>
             </ul>
         </li>
         <?php if($loggedUser !== false && $loggedUser->canAdmin()): ?>
@@ -27,8 +28,8 @@
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Turmas'), ['controller' => 'clazzes'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Critérios / Restrições'), ['controller' => 'ProcessConfigurations'], ['escape' => false]) ?></li>
                 <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Papéis de docentes'), ['controller' => 'roles'], ['escape' => false]) ?></li>
-                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Distribuição automática'), ['controller' => 'processes', 'action' => 'distribute'], ['escape' => false]) ?></li>
-                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Reverter distribuição'), ['controller' => 'processes', 'action' => 'revert'], ['escape' => false]) ?></li>
+                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Distribuição automática'), ['controller' => 'processes', 'action' => 'pre_distribute'], ['escape' => false]) ?></li>
+                <li><?= $this->Html->link('<i class="fa fa-circle-o"></i> ' . __('Reverter distribuição'), ['controller' => 'processes', 'action' => 'pre_revert'], ['escape' => false]) ?></li>
             </ul>
         </li>
         <?php endif; ?>

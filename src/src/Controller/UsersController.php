@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use App\Model\Entity\User;
+use Cake\ORM\TableRegistry;
 use Cake\Event\Event;
 
 /**
@@ -12,7 +13,7 @@ use Cake\Event\Event;
  */
 class UsersController extends AppController
 {
-	
+
 	public function isAuthorized($user)
 	{
 		//Must be logged as teacher
@@ -97,12 +98,30 @@ class UsersController extends AppController
         $user = $this->Users->newEntity();
         if ($this->request->is('post')) {
             $user = $this->Users->patchEntity($user, $this->request->data(), [
-                'associated' => ['Teachers']
+                'associated' => []
             ]);
 
             if($this->Users->save($user)) {
-                $this->Flash->success(__('Conta solicitada com sucesso.'));
-                return $this->redirect(['action' => 'login']);
+                $teacher = $this->Users->Teachers->newEntity($this->request->data['teacher'], [
+                    'associated' => ['KnowledgesTeachers']]);
+                $teacher->user_id = $user->id;
+
+                if ($this->Users->Teachers->save($teacher)) {
+                    $knowledges = TableRegistry::get('Knowledges')->find('all');
+                    foreach($knowledges as $knowledge) {
+                        $knowledgeTeacher = $this->Users->Teachers->KnowledgesTeachers->newEntity();
+                        $knowledgeTeacher->teacher_id = $teacher->id;
+                        $knowledgeTeacher->knowledge_id = $knowledge->id;
+                        $knowledgeTeacher->level = 3;
+
+                        $this->Users->Teachers->KnowledgesTeachers->save($knowledgeTeacher);
+                    }
+                    $this->Flash->success(__('Conta solicitada com sucesso.'));
+                    return $this->redirect(['action' => 'login']);
+                } else {
+                    $this->Users->delete($user);
+                    $this->Flash->error(__('Não foi possível solicitar sua conta, cheque os campos abaixos ou tente novamente mais tarde.'));
+                }
             } else {
                 $this->Flash->error(__('Não foi possível solicitar sua conta, cheque os campos abaixos ou tente novamente mais tarde.'));
             }
@@ -184,7 +203,7 @@ class UsersController extends AppController
         }
         return $this->redirect(['action' => 'index']);
     }
-	
+
 	/**
      * My Account method
      *
@@ -192,7 +211,7 @@ class UsersController extends AppController
      * @return \Cake\Network\Response|null Redirects to Teachers/edit/<teacher_id>.
      */
     public function myAccount()
-    {	
+    {
         return $this->redirect(['controller' => 'Teachers', 'action' => 'edit', $this->loggedUser->teacher->id]);
     }
 }

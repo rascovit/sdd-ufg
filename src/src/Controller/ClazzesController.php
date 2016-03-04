@@ -88,14 +88,14 @@ class ClazzesController extends AppController
         $clazzes = $this->Clazzes->findByFilters($this->request->query);
 
         $this->set('isFiltered', !empty($clazzes->__debugInfo()['params']));
-        $this->set('status', ['' => __('[Selecione]'), 'OPENED' => __('Aberto'), 'CONFLICT' => _('Em conflito'), 'CLOSED' => __('Fechado')]);
+        $this->set('status', ['' => __('[Selecione]'), 'OPENED' => __('Aberto'), 'CONFLICT' => __('Em conflito'), 'CLOSED' => __('Fechado')]);
         $this->set('subjects', array_replace([0 => __('[Selecione]')], $this->Clazzes->Subjects->find('list')->toArray()));
         $this->set('processes', array_replace([0 => __('[Selecione]')], $this->Clazzes->Processes->find('list')->toArray()));
         $this->set('knowledges', array_replace([0 => __('[Selecione]')], $this->Clazzes->Subjects->Knowledges->find('list')->toArray()));
 
         $this->Clazzes->ClazzesTeachers->Teachers->displayField('user.name');
         $this->set('teachers', $this->Clazzes->ClazzesTeachers->Teachers->find('list')->contain(['Users'])->toArray());
-        $this->set('schedules', $this->Clazzes->ClazzesSchedulesLocals->find('list')->contain(['Schedules', 'Locals'])->group(['schedule_id', 'local_id'])->toArray());
+        $this->set('schedules', $this->Clazzes->ClazzesSchedulesLocals->find('list')->contain(['Schedules', 'Locals'])->toArray());
 
         $this->set('clazzes', $this->paginate($clazzes));
         $this->set('_serialize', ['clazzes']);
@@ -546,7 +546,7 @@ class ClazzesController extends AppController
 								'clazz_id' => $clazz_id,
 								'teacher_id' => $teacher_id
 						])->execute();
-						
+
 						$query->update()
 								->set(['status' => 'REJECTED'])
 								->where([
@@ -707,7 +707,7 @@ class ClazzesController extends AppController
 					break;
 				}
 			}
-			
+
 			foreach ($data as $file) {
 				if ($file['type'] != 'application/pdf') {
 					$this->Flash->error(__('Um ou mais arquivos têm extensão inválida (diferente de .pdf). Verifique e tente novamente. ' .

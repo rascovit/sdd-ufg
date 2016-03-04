@@ -13,10 +13,12 @@
                 <h3 class="box-title">Adicionar horário de aula</h3>
             </div>
             <div class="box-body">
-                <?php
-                    echo $this->Form->input('start_time', ['label' => 'Horário de início', 'placeholder' => 'Horário']);
-                    echo $this->Form->input('end_time', ['label' => 'Horário de término', 'placeholder' => 'Horário']);
-                ?>
+                <div class="bootstrap-timepicker">
+                    <?= $this->Form->input('start_time', ['label' => 'Horário de início', 'type' => 'text', 'class' => 'timepicker']) ?>
+                </div>
+                <div class="bootstrap-timepicker">
+                    <?= $this->Form->input('end_time', ['label' => 'Horário de término',  'type' => 'text', 'class' => 'timepicker']) ?>
+                </div>
             </div>
             <div class="box-footer clearfix">
                 <?= $this->Form->button(__('Salvar'), ['class' => 'btn btn-success']) ?>

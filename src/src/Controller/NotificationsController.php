@@ -22,6 +22,7 @@ class NotificationsController extends AppController
             ->where([
                 'Notifications.user_id' => $this->loggedUser->id
             ])
+            ->orderAsc('is_read')
             ->orderDesc('id');
 
         $selectedNotification = $this->request->query('notification');
@@ -37,5 +38,20 @@ class NotificationsController extends AppController
 
         $this->set('notifications', $this->paginate($notifications));
         $this->set('_serialize', ['notifications']);
+    }
+
+    /**
+     * View method
+     *
+     * @param string|null $id Notification id.
+     * @return \Cake\Network\Response|null
+     * @throws \Cake\Network\Exception\NotFoundException When record not found.
+     */
+    public function view($id = null)
+    {
+        $notification = $this->Notifications->get($id);
+        $notification->is_read = true;
+        $this->Notifications->save($notification);
+        return $this->redirect($notification->link);
     }
 }

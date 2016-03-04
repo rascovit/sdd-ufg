@@ -28,7 +28,7 @@ class NotificationsTable extends Table
         parent::initialize($config);
 
         $this->table('notifications');
-        $this->displayField('id');
+        $this->displayField('description');
         $this->primaryKey('id');
 
         $this->belongsTo('Users', [
@@ -58,8 +58,11 @@ class NotificationsTable extends Table
             ->notEmpty('description');
 
         $validator
-            ->add('read', 'valid', ['rule' => 'boolean'])
-            ->notEmpty('read');
+            ->add('is_read', 'valid', ['rule' => 'boolean'])
+            ->notEmpty('is_read');
+
+        $validator
+            ->notEmpty('link');
 
         return $validator;
     }
@@ -86,11 +89,11 @@ class NotificationsTable extends Table
      */
     public function findLatestByUser(Query $query, array $options)
     {
-        $query->where(['Notifications.read' => false])
+        $query->where(['Notifications.is_read' => false])
             ->limit(10)
             ->orderDesc('Notifications.id')
             ->formatResults(function($notifications) {
-                $count = $this->find()->where(['Notifications.read' => false])->count();
+                $count = $this->find()->where(['Notifications.is_read' => false])->count();
                 foreach($notifications as $notification) {
                     $notification->count = $count;
                 }

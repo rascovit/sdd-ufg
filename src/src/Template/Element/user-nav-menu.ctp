@@ -1,15 +1,18 @@
+<?php
+    $notificationsCount = isset($loggedUser->latest_notifications[0]) ? $loggedUser->latest_notifications[0]->count : 0;
+?>
 <div class="navbar-custom-menu">
     <ul class="nav navbar-nav">
         <!-- Notifications Menu -->
         <li class="dropdown notifications-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-bell-o"></i>
-                <?php if(!empty($loggedUser->latest_notifications)): ?>
-                    <span class="label label-warning"><?= $loggedUser->latest_notifications[0]->count > 99 ? '99+' : $loggedUser->latest_notifications[0]->count ?></span>
+                <?php if($notificationsCount > 0): ?>
+                    <span class="label label-warning"><?= $notificationsCount > 99 ? '99+' : $notificationsCount ?></span>
                 <?php endif; ?>
             </a>
             <ul class="dropdown-menu">
-                <li class="header"><?= __(sprintf('Você possui %d notificações', $loggedUser->latest_notifications[0]->count)) ?></li>
+                <li class="header"><?= sprintf(__('Você possui %d notificações'), $notificationsCount) ?></li>
                 <li>
                     <ul class="menu">
                         <?php if(count($loggedUser->latest_notifications) < 1): ?>
@@ -39,8 +42,8 @@
                                 '<i class="fa '.$classes.'"></i> ' . $notification->description,
                                 [
                                     'controller' => 'notifications',
-                                    'action' => 'index',
-                                    '?' => ['notification' => $notification->id]
+                                    'action' => 'view',
+                                    $notification->id
                                 ],
                                 [
                                     'escape' => false
@@ -87,7 +90,7 @@
                 </li>
                 <li class="user-footer">
                     <div class="pull-left">
-                        <?= $this->Html->link(__('Minha conta'), ['controller' => 'users', 'action' => 'myAccount'], ['class' => 'btn btn-default btn-flat']) ?>
+                        <?= $this->Html->link(__('Minha conta'), ['controller' => 'teachers', 'action' => 'view', $loggedUser->teacher->id ], ['class' => 'btn btn-default btn-flat']) ?>
                     </div>
                     <div class="pull-right">
                         <?= $this->Html->link(__('Sair'), ['controller' => 'users', 'action' => 'logout'], ['class' => 'btn btn-default btn-flat']) ?>

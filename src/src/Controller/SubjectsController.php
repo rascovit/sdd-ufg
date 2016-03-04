@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\ORM\TableRegistry;
 
 /**
  * Subjects Controller
@@ -19,9 +20,21 @@ class SubjectsController extends AppController
     public function index()
     {
         $this->paginate = [
-            'contain' => ['Knowledges', 'Courses']
+            'limit' => 25,
+            'order' => [
+                'Subjects.id' => 'ASC'
+            ]
         ];
-        $this->set('subjects', $this->paginate($this->Subjects));
+
+        $this->request->data = $this->request->query;
+        $findByFilters = $this->Subjects->findByFilters($this->request->query);
+        $subjects = $findByFilters['data'];
+
+        $this->set('isFiltered', $findByFilters['isFiltered']);
+        $this->set('courses', array_replace([0 => __('[Selecione]')], $this->Subjects->Courses->find('list')->toArray()));
+        $this->set('knowledges', array_replace([0 => __('[Selecione]')], $this->Subjects->Knowledges->find('list')->toArray()));
+
+        $this->set('subjects', $this->paginate($subjects));
         $this->set('_serialize', ['subjects']);
     }
 
@@ -40,7 +53,21 @@ class SubjectsController extends AppController
                 'Clazzes.Processes'
             ]
         ]);
+
+        $clazzes = [0];
+        foreach($subject->clazzes as $clazz) {
+            $clazzes[] = $clazz->id;
+        }
+
+        $clazzesTeachersModel = TableRegistry::get('ClazzesTeachers');
+        $experiencedTeachers = $clazzesTeachersModel->find()->contain(['Teachers.Users'])
+            ->where([
+                'status' => 'SELECTED',
+                'clazz_id IN' => $clazzes
+            ]);
+
         $this->set('subject', $subject);
+        $this->set('experiencedTeachers', $experiencedTeachers);
         $this->set('_serialize', ['subject']);
     }
 
