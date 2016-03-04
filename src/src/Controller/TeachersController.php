@@ -37,16 +37,15 @@ class TeachersController extends AppController
      */
     public function index()
     {
-
+        $nameFilter = '%' . $this->request->query['name'] . '%';
 		if ($this->loggedUser->canAdmin()) {
-		    $this->set('teachers', $this->paginate($this->Teachers->find('all')->contain(['Users'])));
+		    $this->set('teachers', $this->paginate($this->Teachers->find('all',
+                ['conditions' => ['Users.name like' => $nameFilter]])
+                ->contain(['Users'])));
         } else {
-			$this->set('teachers', $this->paginate($this->Teachers->find('all')
-				->contain(['Users' ])
-				->where('Users', function($q) {
-					return $q->where(['Teachers.id' => $this->loggedUser->teacher->id]);
-				})
-			));
+            $this->set('teachers', $this->paginate($this->Teachers->find('all',
+                            ['conditions' => ['Users.name like' => $nameFilter, 'Teachers.id' => $this->loggedUser->teacher->id]])
+                            ->contain(['Users'])));
 		}
 
 		$this->set('_serialize', ['teachers']);
