@@ -7,12 +7,10 @@ use Cake\ORM\Entity;
  * ProcessConfiguration Entity.
  *
  * @property int $id
- * @property string $name
- * @property string $description
- * @property string $value
- * @property string $data_type
+ * @property int $process_id
+ * @property \App\Model\Entity\Process $process
  * @property string $type
- * @property \App\Model\Entity\Process[] $processes
+ * @property int $priority
  */
 class ProcessConfiguration extends Entity
 {

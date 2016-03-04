@@ -33,15 +33,9 @@ class ProcessesTable extends Table
         $this->hasMany('Clazzes', [
             'foreignKey' => 'process_id'
         ]);
-        $this->belongsToMany('ProcessConfigurations', [
-            'foreignKey' => 'process_id',
-            'targetForeignKey' => 'process_configuration_id',
-            'joinTable' => 'processes_process_configurations'
-        ]);
 		
-		$this->hasMany('ProcessesProcessConfigurations', [
-            'foreignKey' => 'process_id',
-            'propertyName' => 'processes_process_configurations'
+		$this->hasMany('ProcessConfigurations', [
+            'foreignKey' => 'process_id'
         ]);
     }
 

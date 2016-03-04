@@ -10,7 +10,7 @@ use Cake\Validation\Validator;
 /**
  * ProcessConfigurations Model
  *
- * @property \Cake\ORM\Association\BelongsToMany $Processes
+ * @property \Cake\ORM\Association\BelongsTo $Processes
  */
 class ProcessConfigurationsTable extends Table
 {
@@ -26,13 +26,12 @@ class ProcessConfigurationsTable extends Table
         parent::initialize($config);
 
         $this->table('process_configurations');
-        $this->displayField('name');
+        $this->displayField('id');
         $this->primaryKey('id');
 
-        $this->belongsToMany('Processes', [
-            'foreignKey' => 'process_configuration_id',
-            'targetForeignKey' => 'process_id',
-            'joinTable' => 'processes_process_configurations'
+        $this->belongsTo('Processes', [
+            'foreignKey' => 'process_id',
+            'joinType' => 'INNER'
         ]);
     }
 
@@ -45,30 +44,31 @@ class ProcessConfigurationsTable extends Table
     public function validationDefault(Validator $validator)
     {
         $validator
-            ->add('id', 'valid', ['rule' => 'numeric'])
+            ->integer('id')
             ->allowEmpty('id', 'create');
 
         $validator
-            ->requirePresence('name', 'create')
-            ->notEmpty('name');
-
-        $validator
-            ->requirePresence('description', 'create')
-            ->notEmpty('description');
-
-        $validator
-            ->requirePresence('value', 'create')
-            ->notEmpty('value');
-
-        $validator
-            ->requirePresence('data_type', 'create')
-            ->notEmpty('data_type');
-
-        $validator
-            ->add('type', 'enum', ['rule' => ['inList', ['CRITERIA', 'RESTRICTION'], true]])
             ->requirePresence('type', 'create')
             ->notEmpty('type');
 
+        $validator
+            ->integer('priority')
+            ->requirePresence('priority', 'create')
+            ->notEmpty('priority');
+
         return $validator;
+    }
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
+    public function buildRules(RulesChecker $rules)
+    {
+        $rules->add($rules->existsIn(['process_id'], 'Processes'));
+        return $rules;
     }
 }
