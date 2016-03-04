@@ -37,7 +37,10 @@ class TeachersController extends AppController
      */
     public function index()
     {
-        $nameFilter = '%' . $this->request->query['name'] . '%';
+        $nameFilter = '%';
+        if ($this->request->query && $this->request->query['name']) {
+            $nameFilter = '%' . $this->request->query['name'] . '%';
+        }
 		if ($this->loggedUser->canAdmin()) {
 		    $this->set('teachers', $this->paginate($this->Teachers->find('all',
                 ['conditions' => ['Users.name like' => $nameFilter]])
@@ -95,30 +98,36 @@ class TeachersController extends AppController
             }
         }
 
+        $scheduleLocals = [];
+
         $currentProcess = TableRegistry::get('Processes')->find('all', [
-            'conditions' => ['Processes.initial_date <=' => new \DateTime()],
+            'conditions' => ['Processes.initial_date <=' => new \DateTime(), 'Processes.status != ' => 'CANCELLED'],
             'order' => ['Processes.initial_date' => 'DESC']
         ])->first();
 
-        $clazzes = TableRegistry::get('Clazzes')->find()
-                ->innerJoinWith(
-                    'Teachers', function ($q) use ($id) {
-                        return $q->where(['Teachers.id' => $id]);
-                    }
-                )
-                ->innerJoinWith(
-                      'Processes', function ($q) use ($currentProcess) {
-                          return $q->where(['Processes.id' => $currentProcess->id, 'Processes.status != ' => 'CANCELLED']);
-                      }
-                  )
-                ->contain(['ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules'])->all();
+        if ($currentProcess) {
+            $clazzes = TableRegistry::get('Clazzes')->find()
+                    ->innerJoinWith(
+                        'Teachers', function ($q) use ($id) {
+                            return $q->where(['Teachers.id' => $id]);
+                        }
+                    )
+                    ->innerJoinWith(
+                          'Processes', function ($q) use ($currentProcess) {
+                              return $q->where(['Processes.id' => $currentProcess->id]);
+                          }
+                      )
+                    ->contain(['ClazzesSchedulesLocals.Locals', 'ClazzesSchedulesLocals.Schedules'])->all();
 
-        $scheduleLocals = [];
-        foreach ($clazzes as $clazze) {
-            foreach($clazze->scheduleLocals as $scheduleLocal) {
-                $scheduleLocals[] = $scheduleLocal;
+            foreach ($clazzes as $clazze) {
+                foreach($clazze->scheduleLocals as $scheduleLocal) {
+                    $scheduleLocals[] = $scheduleLocal;
+                }
             }
         }
+
+
+
 
         $this->set('teacher', $teacher);
         $this->set('scheduleLocals', $scheduleLocals);
