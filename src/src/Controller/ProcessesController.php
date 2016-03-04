@@ -72,8 +72,15 @@ class ProcessesController extends AppController
     public function index()
     {
         $this->paginate = [
-            'contain' => []
+            'limit' => 25,
+            'order' => [
+                'Processes.id' => 'ASC'
+            ]
         ];
+
+        $this->request->data = $this->request->query;
+        $this->Processes = $this->Processes->findByFilters($this->request->query);
+
         $this->set('processes', $this->paginate($this->Processes));
         $this->set('_serialize', ['processes']);
     }
